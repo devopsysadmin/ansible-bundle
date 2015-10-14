@@ -5,8 +5,6 @@
 import yaml
 import os, sys, time
 from subprocess import Popen, STDOUT, PIPE, call
-from threading import Thread
-from Queue import Queue
 
 FOLDER = os.getcwd()
 PATH = {
