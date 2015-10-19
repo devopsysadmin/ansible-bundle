@@ -74,6 +74,12 @@ def run_cmd(command):
 	return output, returncode
 
 
+def get_name_and_version_from_bundle_name(bundleName):
+	string = bundleName.split('/')
+	name = string[0]
+	version = string[1] if len(string)>1 else 'master'
+	return name, version	
+
 def get_bundle_from(bundle, kind):
 	b = {
 		'name'		: None,
@@ -83,17 +89,21 @@ def get_bundle_from(bundle, kind):
 		'scm'		: DEFAULT_SCM
 	}
 	if isinstance(bundle, str):
+		name, version = get_name_and_version_from_bundle_name(bundle)
 		upd = {
-			'name': bundle,
-			'src' : DEFAULT_SCM_URL[kind] + bundle,
+			'name': name,
+			'version' : version,
+			'src' : DEFAULT_SCM_URL[kind] + name,
 			'kind': kind
 		}
 		b.update(upd)
 		return b
 	elif isinstance(bundle, dict):
+		name, version = get_name_and_version_from_bundle_name(bundle[kind])
 		upd = {
-			'name'	: bundle[kind],
-			'src'	: DEFAULT_SCM_URL[kind] + bundle[kind],
+			'name'	: name,
+			'version' : version,
+			'src'	: DEFAULT_SCM_URL[kind] + name,
 			'kind'	: kind
 		}
 		b.update(upd)
@@ -192,17 +202,19 @@ def main():
 	downloaded = list()
 
 	## Get bundles from specific YML file
-	if len(sys.argv)>1:
-		for bundle in get_all_bundles_in_yml(load_yml(sys.argv[1])):
+	filename = sys.argv[1] if len(sys.argv)>1 else 'site.yml'
+	if os.path.exists(filename):
+		for bundle in get_all_bundles_in_yml(load_yml(filename)):
 			if not os.path.exists(get_bundle_path(bundle)):
 				downloaded.append(bundle)
 				get_bundle_code (bundle)
 
-	## Get bundles from dependecies in meta/main.yml
+
+	## Get bundles from dependecies for each meta/main.yml in every bundle
 	waitlist = ['dummy']
 	while len(waitlist)>0:
-		rl = get_dependencies_tree('role') + get_dependencies_tree('library')
-		waitlist = [item for item in rl if item not in downloaded]
+		dependencies = get_dependencies_tree('role') + get_dependencies_tree('library')
+		waitlist = [item for item in dependencies if item not in downloaded]
 		for bundle in waitlist:
 			downloaded.append(bundle)
 			get_bundle_code (bundle)
