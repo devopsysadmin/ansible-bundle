@@ -3,6 +3,7 @@
 #
 
 import yaml
+import argparse
 import os, sys, time
 from subprocess import Popen, STDOUT, PIPE, call
 
@@ -16,8 +17,8 @@ DEFAULT_SCM = 'git'
 DEFAULT_SCM_VERSION = 'master'
 DEFAULT_SCM_BASE = 'https://descinet.bbva.es/stash/scm'
 DEFAULT_SCM_URL = {
-	'role'		: '%s/doansr/' %DEFAULT_SCM_BASE,
-	'module'	: '%s/doansm/' %DEFAULT_SCM_BASE
+	'role'		: '%s/doarol/' %DEFAULT_SCM_BASE,
+	'module'	: '%s/doamod/' %DEFAULT_SCM_BASE
 	}
 
 
@@ -48,14 +49,18 @@ class Git:
 		if rc == 0 : 
 			return True
 		else:
-			errorlist.append('git %s: %s' %(self.url, self.error(rc)))
 			return False
 
-	def error(self, errcode):
-		msg = {
-			128	: 'Repository does not exist'
-		}
-		return msg[errcode]
+	def update(self):
+		cmd = ['git', 'pull']
+		prev = os.getcwd()
+		os.chdir(self.path)
+		stdout, rc = run_cmd(cmd)
+		os.chdir(prev)
+		if rc == 0:
+			return True
+		else:
+			return False
 
 
 def load_yml(filename):
@@ -63,6 +68,12 @@ def load_yml(filename):
 		contents = yaml.load(fn)
 	return contents
 
+def printf(message, lr=True):
+	if lr:
+		print message
+	else:
+		print message,
+	sys.stdout.flush()
 
 def run_cmd(command):
 	stdout = None
@@ -72,6 +83,16 @@ def run_cmd(command):
 	output = stdout + stderr
 	returncode = process.returncode
 	return output, returncode
+
+def get_arguments():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--file', dest='filename', default='site.yml',
+		help='YML file to be processed (default:site.yml)')
+	parser.add_argument('--run', action='store_true', dest='run_playbook',
+		default=False, 
+		help='Runs ansible-playbook with default params after getting bundles')
+
+	return parser.parse_args()
 
 
 def get_name_and_version_from_bundle_name(bundleName):
@@ -154,7 +175,8 @@ def get_all_bundles_in_yml(yml):
 
 def get_bundle_path(bundle):
 	kind = bundle['kind']
-	return '%s/%s/%s' %(PATH[kind], bundle['name'], bundle['version'])
+	path = '%s/%s/%s' %(PATH[kind], bundle['name'], bundle['version'])
+	return path
 
 
 def get_bundle_code(bundle):
@@ -165,13 +187,14 @@ def get_bundle_code(bundle):
 		'git'	: Git,
 	}
 	code = scm[bundle['scm']](bundle['src'], folder)
-	print 'Getting %s from %s (%s)...' %(bundle['name'], bundle['src'], bundle['version']) ,
-	ok = code.get(bundle['version'])
+	printf ('Getting %s from %s (%s)...' %(bundle['name'], bundle['src'], bundle['version']), False)
+	ok = code.update() if os.path.exists(folder) else code.get(bundle['version'])
+
 	if ok:
 		msg = bcolors.OKGREEN + 'OK' + bcolors.ENDC
 	else:
 		msg = bcolors.FAIL + 'ERROR' + bcolors.ENDC
-	print msg
+	printf(msg)
 	return ok
 
 
@@ -198,31 +221,47 @@ def get_dependencies_tree(root):
 	return retval
 
 
-def main():
-	downloaded = list()
+# def main(args):
+# 	downloaded = list()
 
-	## Get bundles from specific YML file
-	filename = sys.argv[1] if len(sys.argv)>1 else 'site.yml'
-	if os.path.exists(filename):
-		for bundle in get_all_bundles_in_yml(load_yml(filename)):
-			if not os.path.exists(get_bundle_path(bundle)):
-				downloaded.append(bundle)
-				get_bundle_code (bundle)
+# 	## Get bundles from specific YML file
+# 	if os.path.exists(args.filename):
+# 		for bundle in get_all_bundles_in_yml(load_yml(args.filename)):
+# 			if not os.path.exists(get_bundle_path(bundle)):
+# 				downloaded.append(bundle)
+# 				get_bundle_code (bundle)
+# 	else:
+# 		sys.exit('File %s not found' %args.filename)
 
 
-	## Get bundles from dependecies for each meta/main.yml in every bundle
-	waitlist = ['dummy']
-	while len(waitlist)>0:
-		dependencies = get_dependencies_tree('role') + get_dependencies_tree('library')
-		waitlist = [item for item in dependencies if item not in downloaded]
-		for bundle in waitlist:
+# 	## Get bundles from dependecies for each meta/main.yml in every bundle
+# 	waitlist = ['dummy']
+# 	while len(waitlist)>0:
+# 		dependencies = get_dependencies_tree('role') + get_dependencies_tree('library')
+# 		waitlist = [item for item in dependencies if item not in downloaded]
+# 		for bundle in waitlist:
+# 			downloaded.append(bundle)
+# 			get_bundle_code (bundle)
+
+
+def main(args):
+	downloaded=list()
+
+	## End if file doesn't exist
+	if not os.path.exists(args.filename):
+		return ('File %s not found' %args.filename)
+
+	## Get bundles from YML
+	yml = load_yml(args.filename)
+	for bundle in get_all_bundles_in_yml(yml):
+		if bundle not in downloaded:
+			get_bundle_code(bundle)
 			downloaded.append(bundle)
-			get_bundle_code (bundle)
 
-	if len(errorlist)>0:
-		print '\nErrors found:'
-		for msg in errorlist: print msg
+
+
 
 ########################################################
-errorlist = list()
-main()
+if __name__ == "__main__":
+	args = get_arguments()
+	sys.exit(main(args))
