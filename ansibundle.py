@@ -206,42 +206,7 @@ def get_dependencies_tree(root):
 			if 'meta/main.yml' in path:
 				deps += get_all_bundles_in_yml(load_yml(path))
 
-	pendant = list()
-	for bundle in deps:
-		if not os.path.exists(get_bundle_path(bundle)):
-			pendant.append(bundle)
-
-	retval = list()
-	repeated = list()
-	for bundle in pendant:
-		src = bundle.get('src')
-		if src not in repeated:
-			retval.append(bundle)
-			repeated.append(src)
-	return retval
-
-
-# def main(args):
-# 	downloaded = list()
-
-# 	## Get bundles from specific YML file
-# 	if os.path.exists(args.filename):
-# 		for bundle in get_all_bundles_in_yml(load_yml(args.filename)):
-# 			if not os.path.exists(get_bundle_path(bundle)):
-# 				downloaded.append(bundle)
-# 				get_bundle_code (bundle)
-# 	else:
-# 		sys.exit('File %s not found' %args.filename)
-
-
-# 	## Get bundles from dependecies for each meta/main.yml in every bundle
-# 	waitlist = ['dummy']
-# 	while len(waitlist)>0:
-# 		dependencies = get_dependencies_tree('role') + get_dependencies_tree('library')
-# 		waitlist = [item for item in dependencies if item not in downloaded]
-# 		for bundle in waitlist:
-# 			downloaded.append(bundle)
-# 			get_bundle_code (bundle)
+	return deps
 
 
 def main(args):
@@ -258,6 +223,14 @@ def main(args):
 			get_bundle_code(bundle)
 			downloaded.append(bundle)
 
+	## Get bundles from meta/main.yml on each bundle
+ 	waitlist = ['dummy']
+ 	while len(waitlist)>0:
+ 		dependencies = get_dependencies_tree('role') + get_dependencies_tree('library')
+ 		waitlist = [item for item in dependencies if item not in downloaded]
+ 		for bundle in waitlist:
+			get_bundle_code(bundle)
+ 			downloaded.append(bundle)
 
 
 
