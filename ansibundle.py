@@ -36,7 +36,6 @@ class bcolors:
 class Git:
 	url = None
 	path = None
-	branch = None
 	tag = None
 
 	def __init__(self, url, path):
@@ -46,13 +45,21 @@ class Git:
 	def get(self, version):
 		cmd = [ 'git','clone', '--branch', version, '--depth', '1', self.url, self.path ]
 		stdout, rc = run_cmd(cmd)
-		if rc == 0 : 
+		if rc == 0 :
 			return True
 		else:
 			return False
 
+	def branch(self):
+		cmd = ['git', 'branch']
+		stdout, rc = run_cmd(cmd)
+		if rc == 0:
+			return stdout.split(' ')[1]
+		else:
+			raise Exception('Could not get current branch')
+
 	def update(self):
-		cmd = ['git', 'pull']
+		cmd = ['git', 'pull', 'origin', self.branch() ]
 		prev = os.getcwd()
 		os.chdir(self.path)
 		stdout, rc = run_cmd(cmd)
@@ -91,6 +98,8 @@ def get_arguments():
 	parser.add_argument('--run', action='store_true', dest='run_playbook',
 		default=False, 
 		help='Runs ansible-playbook with default params after getting bundles')
+	parser.add_argument('--args', nargs='?',
+		help='ansible-playbook arguments, if needed. Must be put into quotes')
 
 	return parser.parse_args()
 
@@ -99,7 +108,7 @@ def get_name_and_version_from_bundle_name(bundleName):
 	string = bundleName.split('/')
 	name = string[0]
 	version = string[1] if len(string)>1 else 'master'
-	return name, version	
+	return name, version
 
 def get_bundle_from(bundle, kind):
 	b = {
@@ -175,7 +184,10 @@ def get_all_bundles_in_yml(yml):
 
 def get_bundle_path(bundle):
 	kind = bundle['kind']
-	path = '%s/%s/%s' %(PATH[kind], bundle['name'], bundle['version'])
+	if bundle['version']=='master':
+		path = '%s/%s' %(PATH[kind], bundle['name'])
+	else:
+		path = '%s/%s/%s' %(PATH[kind], bundle['name'], bundle['version'])
 	return path
 
 
@@ -187,8 +199,16 @@ def get_bundle_code(bundle):
 		'git'	: Git,
 	}
 	code = scm[bundle['scm']](bundle['src'], folder)
-	printf ('Getting %s from %s (%s)...' %(bundle['name'], bundle['src'], bundle['version']), False)
-	ok = code.update() if os.path.exists(folder) else code.get(bundle['version'])
+	if os.path.exists(folder):
+		msg = 'Updating'
+		func = code.update
+		args = None
+	else:
+		msg = 'Getting'
+		func = code.get
+		args = bundle['version']
+	printf ('%s %s from %s (%s)...' %(msg, bundle['name'], bundle['src'], bundle['version']), False)
+	ok = func(args) if args else func()
 
 	if ok:
 		msg = bcolors.OKGREEN + 'OK' + bcolors.ENDC
@@ -209,15 +229,15 @@ def get_dependencies_tree(root):
 	return deps
 
 
-def main(args):
+def main(params):
 	downloaded=list()
 
 	## End if file doesn't exist
-	if not os.path.exists(args.filename):
-		return ('File %s not found' %args.filename)
+	if not os.path.exists(params.filename):
+		return ('File %s not found' %params.filename)
 
 	## Get bundles from YML
-	yml = load_yml(args.filename)
+	yml = load_yml(params.filename)
 	for bundle in get_all_bundles_in_yml(yml):
 		if bundle not in downloaded:
 			get_bundle_code(bundle)
@@ -231,6 +251,12 @@ def main(args):
  		for bundle in waitlist:
 			get_bundle_code(bundle)
  			downloaded.append(bundle)
+
+ 	if params.run_playbook is True:
+		args = params.args.split(' ') if params.args else list()
+ 		ansible = ['ansible-playbook', params.filename ] + args
+ 		printf('Running ' + bcolors.BOLD + ' '.join(ansible) + bcolors.ENDC)
+ 		call(ansible)
 
 
 
