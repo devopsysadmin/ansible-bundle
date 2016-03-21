@@ -228,6 +228,13 @@ def get_dependencies_tree(root):
 
 	return deps
 
+def get_includes(yml):
+	retList=list()
+	for element in yml:
+		for key, value in element.items():
+			if key == 'include' and value is not None:
+				retList += load_yml(value)
+	return retList
 
 def main(params):
 	downloaded=list()
@@ -237,7 +244,7 @@ def main(params):
 		return ('File %s not found' %params.filename)
 
 	## Get bundles from YML
-	yml = load_yml(params.filename)
+	yml = get_includes(load_yml(params.filename))
 	for bundle in get_all_bundles_in_yml(yml):
 		if bundle not in downloaded:
 			get_bundle_code(bundle)
