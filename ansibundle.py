@@ -242,7 +242,7 @@ def main():
 
 	## End if file doesn't exist
 	if not os.path.exists(params.filename):
-		return ('File %s not found' %params.filename)
+		raise Exception('File %s not found' %params.filename)
 
 	## Get bundles from YML
 	yml = get_includes(load_yml(params.filename))
@@ -270,4 +270,4 @@ def main():
 
 ########################################################
 if __name__ == "__main__":
-	sys.exit(main())
+	main()
