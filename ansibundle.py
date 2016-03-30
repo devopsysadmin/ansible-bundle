@@ -98,7 +98,7 @@ def get_arguments():
 	parser.add_argument('--run', action='store_true', dest='run_playbook',
 		default=False, 
 		help='Runs ansible-playbook with default params after getting bundles')
-	parser.add_argument('--args', nargs='?',
+	parser.add_argument('--runargs', dest='args', nargs='?',
 		help='ansible-playbook arguments, if needed. Must be put into quotes')
 
 	return parser.parse_args()
@@ -236,7 +236,8 @@ def get_includes(yml):
 				retList += load_yml(value)
 	return retList
 
-def main(params):
+def main():
+	params = get_arguments()
 	downloaded=list()
 
 	## End if file doesn't exist
@@ -269,5 +270,4 @@ def main(params):
 
 ########################################################
 if __name__ == "__main__":
-	args = get_arguments()
-	sys.exit(main(args))
+	sys.exit(main())
