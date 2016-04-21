@@ -7,6 +7,9 @@ import argparse
 import os, sys, time
 from subprocess import Popen, STDOUT, PIPE, call
 
+EXIT_OK = 0
+EXIT_ERROR = 1
+
 FOLDER = os.getcwd()
 PATH = {
 	'role' 		: '%s/roles' %FOLDER,
@@ -45,7 +48,7 @@ class Git:
 	def get(self, version):
 		cmd = [ 'git','clone', '--branch', version, '--depth', '1', self.url, self.path ]
 		stdout, rc = run_cmd(cmd)
-		if rc == 0 :
+		if rc == EXIT_OK :
 			return True
 		else:
 			return False
@@ -53,7 +56,7 @@ class Git:
 	def branch(self):
 		cmd = ['git', 'branch']
 		stdout, rc = run_cmd(cmd)
-		if rc == 0:
+		if rc == EXIT_OK:
 			return stdout.split(' ')[1]
 		else:
 			raise Exception('Could not get current branch')
@@ -64,7 +67,7 @@ class Git:
 		os.chdir(self.path)
 		stdout, rc = run_cmd(cmd)
 		os.chdir(prev)
-		if rc == 0:
+		if rc == EXIT_OK:
 			return True
 		else:
 			return False
@@ -236,7 +239,6 @@ def get_includes(yml):
 				retList += load_yml(value)
 	return retList
 
-
 def main():
 	params = get_arguments()
 	downloaded=list()
@@ -250,9 +252,10 @@ def main():
 	yml += get_includes(yml)
 
 	for bundle in get_all_bundles_in_yml(yml):
-		if bundle not in downloaded:
-			get_bundle_code(bundle)
+		if get_bundle_code(bundle):
 			downloaded.append(bundle)
+		else:
+			return EXIT_ERROR
 
 	## Get bundles from meta/main.yml on each bundle
  	waitlist = ['dummy']
@@ -260,8 +263,10 @@ def main():
  		dependencies = get_dependencies_tree('role') + get_dependencies_tree('library')
  		waitlist = [item for item in dependencies if item not in downloaded]
  		for bundle in waitlist:
-			get_bundle_code(bundle)
- 			downloaded.append(bundle)
+			if get_bundle_code(bundle):
+ 				downloaded.append(bundle)
+ 			else:
+ 				return EXIT_ERROR
 
  	if params.run_playbook is True:
 		args = params.args.split(' ') if params.args else list()
@@ -273,4 +278,4 @@ def main():
 
 ########################################################
 if __name__ == "__main__":
-	main()
+	sys.exit(main())
