@@ -101,7 +101,7 @@ def get_arguments():
 	parser.add_argument('--run', action='store_true', dest='run_playbook',
 		default=False, 
 		help='Runs ansible-playbook with default params after getting bundles')
-	parser.add_argument('--runargs', dest='args', nargs='?',
+	parser.add_argument('--args', dest='args', nargs='?',
 		help='ansible-playbook arguments, if needed. Must be put into quotes')
 
 	return parser.parse_args()
@@ -251,25 +251,20 @@ def main():
 	yml = load_yml(params.filename)
 	yml += get_includes(yml)
 
-	for bundle in get_all_bundles_in_yml(yml):
-		if get_bundle_code(bundle):
-			downloaded.append(bundle)
-		else:
-			return EXIT_ERROR
-
-	## Get bundles from meta/main.yml on each bundle
- 	waitlist = ['dummy']
- 	while len(waitlist)>0:
+	## Download main bundles, then its dependencies
+ 	bundles = get_all_bundles_in_yml(yml)
+ 	while len(bundles)>0:
  		dependencies = get_dependencies_tree('role') + get_dependencies_tree('library')
- 		waitlist = [item for item in dependencies if item not in downloaded]
- 		for bundle in waitlist:
+ 		bundles += [item for item in dependencies if item not in downloaded]
+ 		for bundle in bundles:
+			bundles.remove(bundle)
 			if get_bundle_code(bundle):
  				downloaded.append(bundle)
  			else:
  				return EXIT_ERROR
 
  	if params.run_playbook is True:
-		args = params.args.split(' ') if params.args else list()
+		args = params.args.split() if params.args else list()
  		ansible = ['ansible-playbook', params.filename ] + args
  		printf('Running ' + bcolors.BOLD + ' '.join(ansible) + bcolors.ENDC)
  		call(ansible)
