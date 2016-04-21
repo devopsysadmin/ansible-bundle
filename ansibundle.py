@@ -236,6 +236,7 @@ def get_includes(yml):
 				retList += load_yml(value)
 	return retList
 
+
 def main():
 	params = get_arguments()
 	downloaded=list()
@@ -244,8 +245,10 @@ def main():
 	if not os.path.exists(params.filename):
 		raise Exception('File %s not found' %params.filename)
 
-	## Get bundles from YML
-	yml = get_includes(load_yml(params.filename))
+	## Get contents and includes from main YML
+	yml = load_yml(params.filename)
+	yml += get_includes(yml)
+
 	for bundle in get_all_bundles_in_yml(yml):
 		if bundle not in downloaded:
 			get_bundle_code(bundle)
