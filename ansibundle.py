@@ -74,8 +74,11 @@ class Git:
 
 
 def load_yml(filename):
-	with open(filename, 'r') as fn:
-		contents = yaml.load(fn)
+	contents = None
+	if os.path.isfile(filename):
+		with open(filename, 'r') as fn:
+			contents = yaml.load(fn)
+	if contents is None: contents = ''
 	return contents
 
 def printf(message, lr=True):
@@ -234,9 +237,9 @@ def get_dependencies_tree(root):
 def get_includes(yml):
 	retList=list()
 	for element in yml:
-		for key, value in element.items():
-			if key == 'include' and value is not None:
-				retList += load_yml(value)
+		include = element.get('include', None)
+		if include is not None:
+			retList += load_yml(include)
 	return retList
 
 def main():
