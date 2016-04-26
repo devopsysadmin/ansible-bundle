@@ -1,11 +1,10 @@
-#!/usr/bin/env python2
 # -*- encoding: utf8 -*-
-#
-
 import yaml
 import argparse
 import os, sys, time
 from subprocess import Popen, STDOUT, PIPE, call
+
+__version__ = '0.1'
 
 EXIT_OK = 0
 EXIT_ERROR = 1

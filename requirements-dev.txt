@@ -1,0 +1,5 @@
+coverage
+coveralls
+nose
+sphinx
+flake8
