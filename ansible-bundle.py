@@ -34,16 +34,21 @@ def get_dependencies_tree(pathDir):
         for filename in filenames:
             path = shell.path(directory, filename)
             if 'meta/main.yml' in path:
-                deps += get_all_bundles_in_yml(shell.load(path))
-
-    return deps
+                deps += get_bundles_from(shell.load(path))
+    return list(set(deps))
 
 def get_bundles_from(yml):
     bundles = list()
-    for role in yml.get('roles', list()):
-        bundle = Bundle('role', role)
-        bundles.append(bundle)
-    return bundles
+    for bundle in yml.get('roles', list()):
+        b = Bundle('role', bundle)
+        bundles.append(b)
+
+    for bundle in yml.get('dependencies', list()):
+        if bundle.get('role', None):
+            b = Bundle('role', bundle)
+            bundles.append(b)
+
+    return list(set(bundles))
 
 def main():
     params = get_arguments()
@@ -66,13 +71,11 @@ def main():
         for bundle in bundles:
             bundles.remove(bundle)
             if bundle.download() is True:
-                downloaded.append(bundle)
+                downloaded.append(bundle.name)
             else:
                 return shell.ERROR
-        shell.echo('Looking for dependencies...', typeOf='info', lr=False)
         dependencies = get_dependencies_tree(PATH['role']) + get_dependencies_tree(PATH['library'])
-        bundles += [ item for item in dependencies if item not in downloaded ]
-        shell.echo('OK', typeOf='ok')
+        bundles = [item for item in bundles if item.name not in downloaded] + [ item for item in dependencies if item.name not in downloaded ]
 
     ## After getting bundles, run playbook if set to
     if params.run_playbook is True:
