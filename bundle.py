@@ -42,10 +42,12 @@ class Bundle(object):
         return name, version
 
     def __role(self, raw):
-        self.name, self.version = self.__get_name_version(raw.get('role', 'unnamed'))
+        if isinstance(raw, dict):
+            self.name, self.version = self.__get_name_version(raw.get('role', 'unnamed'))
+        else:
+            self.name, self.version = (raw, DEFAULTS.SCM_VERSION)
         self.path = shell.path(WORKDIR, PATH['role'], self.name)
         self.url = '%s/%s' %(DEFAULTS.SCM_ROLES, self.name)
-
 
     def download(self):
         git = Git(self.url, self.path)
