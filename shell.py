@@ -2,99 +2,135 @@
 # -*- encoding: utf8 -*-
 #
 
+from __future__ import print_function
 import os, sys, time
 from subprocess import Popen, STDOUT, PIPE
 from subprocess import call as Call
 import yaml
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+# Color + decoration for messages printed on terminal
+MESSAGES = {
+    'none' : (None, None),
+    'ok' : ('green', None),
+    'info': ('blue', None),
+    'warning' : ('yellow', None),
+    'error' : ('red', 'bold'),
+}
+
+class Color:
+    COLORS = {
+        'red'       : '\033[91m',
+        'green'     : '\033[92m',
+        'yellow'    : '\033[93m',
+        'blue'      : '\033[94m',
+    }
+
+    DECORATIONS={
+        'bold'      : '\033[1m',
+        'underline' : '\033[4m',
+    }
+
+    END= '\033[0m'
+
+    @classmethod
+    def text(cls, s, **kwargs):
+        msg = ''
+        color = kwargs.get('color', None)
+        decoration = kwargs.get('decoration', None)
+        if decoration is not None:
+            msg += cls.DECORATIONS[decoration]
+        if color is not None:
+            msg += cls.COLORS[color]
+        msg += s
+        if color or decoration:
+            msg += cls.END
+        return (msg)
 
 class Defaults:
-	SCM = 'git'
-	SCM_VERSION = 'master'
-	SCM_PREFIX = ''
-	SCM_ROLES = ''
-	SCM_MODULES = ''
+    SCM = 'git'
+    SCM_VERSION = 'master'
+    SCM_PREFIX = ''
+    SCM_ROLES = ''
+    SCM_MODULES = ''
 
-	def __init__(self):
-		yml = self.load()
-		if yml is not '':
-			self.setvalues(yml)
-		else:
-			raise Exception('%s not found or incorrect.' %path)
+    def __init__(self):
+        yml = self.load()
+        if yml is not '':
+            self.setvalues(yml)
+        else:
+            raise Exception('%s not found or incorrect.' %path)
 
-	def load(self):
-		LOAD_ORDER=(
-			path(pwd(), 'bundle.cfg'),
-			path(HOME, '.ansible', 'bundle', 'bundle.cfg' )
-			)
-		for filename in LOAD_ORDER:
-			if isfile(filename):
-				return load(filename)
+    def load(self):
+        LOAD_ORDER=(
+            path(pwd(), 'bundle.cfg'),
+            path(HOME, '.ansible', 'bundle', 'bundle.cfg' )
+            )
+        for filename in LOAD_ORDER:
+            if isfile(filename):
+                return load(filename)
 
-	def setvalues(self, yml):
-		for key, value in yml.items():
-			setattr(self, key, value)
-		if self.SCM_PREFIX:
-			self.SCM_ROLES = self.SCM_PREFIX + self.SCM_ROLES
-			self.SCM_MODULES = self.SCM_PREFIX + self.SCM_MODULES
+    def setvalues(self, yml):
+        for key, value in yml.items():
+            setattr(self, key, value)
+        if self.SCM_PREFIX:
+            self.SCM_ROLES = self.SCM_PREFIX + self.SCM_ROLES
+            self.SCM_MODULES = self.SCM_PREFIX + self.SCM_MODULES
 
 def load(filename):
-	contents = None
-	if os.path.isfile(filename):
-		with open(filename, 'r') as fn:
-			contents = yaml.load(fn)
-	if contents is None: contents = ''
-	return contents
+    contents = None
+    if os.path.isfile(filename):
+        with open(filename, 'r') as fn:
+            contents = yaml.load(fn)
+    if contents is None: contents = ''
+    return contents
 
-def echo(message, lr=True):
-	if lr:
-		print message
-	else:
-		print message,
-	sys.stdout.flush()
+def echo(message, lr=True, typeOf=None):
+    if lr :
+        end = '\n'
+    else:
+        end = ' '
+    if typeOf:
+        color, decoration = MESSAGES[typeOf]
+        msg = Color.text(message, color=color, decoration=decoration)
+    else:
+        msg = message
+    print(msg, end=end)
+    sys.stdout.flush()
 
 def run(command):
-	stdout = None
-	stderr = None
-	process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
-	stdout, stderr = process.communicate()
-	output = stdout + stderr
-	returncode = process.returncode
-	return output, returncode
+    stdout = None
+    stderr = None
+    process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = process.communicate()
+    output = stdout + stderr
+    returncode = process.returncode
+    return output, returncode
 
 def pwd():
-	return os.getcwd()
+    return os.getcwd()
 
 def exit(arg):
-	return sys.exit(arg)
+    return sys.exit(arg)
 
 def isfile(filename):
-	return os.path.isfile(filename)
+    return os.path.isfile(filename)
 
 def isdir(dirname):
-	return os.path.exists(dirname)
+    return os.path.exists(dirname)
 
 def path(*args):
-	return os.path.join(*args)
+    return os.path.join(*args)
 
 def call(args):
-	return Call(args)
+    return Call(args)
 
 def walk(args):
-	return os.walk(args)
+    return os.walk(args)
 
 def cd(dirname):
-	return os.chdir(dirname)
+    return os.chdir(dirname)
 
+###############################
 OK = 0
 ERROR = 1
 HOME = os.getenv('HOME')
