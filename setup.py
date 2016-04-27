@@ -23,7 +23,7 @@ setup(name='ansible-bundle',
       packages=find_packages(exclude=['test']),
       entry_points={
           'console_scripts': [
-             'ansible-bundle = main:main',
+             'ansible-bundle = ansible_bundle.main:main',
           ],
       },
       include_package_data=True,
