@@ -27,10 +27,10 @@ class Bundle(object):
 
     def __str__(self):
         string = """
-            name : %s
-            path : %s
+            name    : %s
+            path    : %s
             version : %s
-            url: %s
+            url     : %s
         """.replace('\t', '') % (
             self.name,
             self.path,
@@ -50,10 +50,10 @@ class Bundle(object):
     def __generate_name_version(self, raw):
         if isinstance(raw, dict):
             split = raw.get('role', 'unnamed').split('/')
-            name = split[0]
-            version = split[1] if len(split) > 1 else DEFAULTS.SCM_VERSION
         else:
-            name, version = (raw, DEFAULTS.SCM_VERSION)
+            split = raw.split('/')
+        name = split[0]
+        version = split[1] if len(split) > 1 else DEFAULTS.SCM_VERSION
         return name, version
 
     def __generate_path(self, name, version):
@@ -63,19 +63,17 @@ class Bundle(object):
         return path
 
     def download(self):
-        git = Git(self.url, self.path)
+        git = Git(self.url, self.path, self.version)
         if shell.isdir(self.path):
             msg = 'Updating'
             func = git.update
-            args = None
         else:
             msg = 'Getting'
             func = git.get
-            args = self.version
         shell.echo('%s %s from %s (%s)...' % (msg, self.name,
                                               self.url, self.version),
                    typeOf='info', lr=False)
-        ok = func(args) if args else func()
+        ok = func()
         if ok:
             shell.echo('OK', typeOf='ok')
         else:
