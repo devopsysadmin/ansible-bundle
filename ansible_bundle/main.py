@@ -4,7 +4,6 @@
 
 import argparse
 import shell
-from scm import Git
 from bundle import Bundle, PATH
 
 def get_arguments():
@@ -18,15 +17,6 @@ def get_arguments():
         help='ansible-playbook arguments, if needed. Must be put into quotes')
 
     return parser.parse_args()
-
-def get_includes(yml):
-    retList=list()
-    for element in yml:
-        include = element.get('include', None)
-        if include is not None:
-            yml.remove(element)
-            retList += shell.load(include)
-    return retList
 
 def get_dependencies_tree(pathDir):
     deps = list()
@@ -50,6 +40,16 @@ def get_bundles_from(yml):
 
     return list(set(bundles))
 
+def expand(contents):
+    yml = list()
+    for element in contents:
+        include = element.get('include', None)
+        if include:
+            yml+=(shell.load(include))
+        else:
+            yml+=append(element)
+    return yml
+
 def main():
     params = get_arguments()
     downloaded=list()
@@ -59,8 +59,7 @@ def main():
         raise Exception('File %s not found' %params.filename)
 
     ## Get contents and includes from main YML
-    yml = shell.load(params.filename)
-    yml += get_includes(yml)
+    yml = expand(shell.load(params.filename))
 
     ## Get bundles from main yml and its includes
     bundles = list()

@@ -16,6 +16,9 @@ PATH = {
 class Bundle(object):
 
     name = None
+    path = None
+    version = None
+    url = None
 
     def __init__(self, typeof, raw):
         if typeof == 'role':
@@ -35,19 +38,27 @@ class Bundle(object):
             )
         return string
 
-    def __get_name_version(self, string):
-        split = string.split('/')
-        name = split[0]
-        version = split[1] if len(split)>1 else DEFAULTS.SCM_VERSION
+    def __role(self, raw):
+        self.name, self.version = self.__generate_name_version(raw)
+        self.path = self.__generate_path(self.name, self.version)
+        self.url = self.__generate_url(self.name)
+
+    def __generate_url(self, name):
+        return '%s/%s' %(DEFAULTS.SCM_ROLES, name)
+
+    def __generate_name_version(self, raw):
+        if isinstance(raw, dict):
+            split = raw.get('role', 'unnamed').split('/')
+            name = split[0]
+            version = split[1] if len(split)>1 else DEFAULTS.SCM_VERSION
+        else:
+            name, version = (raw, DEFAULTS.SCM_VERSION)
         return name, version
 
-    def __role(self, raw):
-        if isinstance(raw, dict):
-            self.name, self.version = self.__get_name_version(raw.get('role', 'unnamed'))
-        else:
-            self.name, self.version = (raw, DEFAULTS.SCM_VERSION)
-        self.path = shell.path(WORKDIR, PATH['role'], self.name)
-        self.url = '%s/%s' %(DEFAULTS.SCM_ROLES, self.name)
+    def __generate_path(self, name, version):
+        path = shell.path(WORKDIR, PATH['role'], name)
+        if version != 'master' : path = shell.path(path, version)
+        return path
 
     def download(self):
         git = Git(self.url, self.path)

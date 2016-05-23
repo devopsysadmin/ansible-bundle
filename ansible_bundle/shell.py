@@ -77,12 +77,9 @@ class Defaults:
             self.SCM_MODULES = self.SCM_PREFIX + self.SCM_MODULES
 
 def load(filename):
-    contents = None
     if os.path.isfile(filename):
         with open(filename, 'r') as fn:
-            contents = yaml.load(fn)
-    if contents is None: contents = ''
-    return contents
+            return yaml.load(fn)
 
 def echo(message, lr=True, typeOf=None):
     if lr :
