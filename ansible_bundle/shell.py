@@ -3,34 +3,36 @@
 #
 
 from __future__ import print_function
-import os, sys, time
-from subprocess import Popen, STDOUT, PIPE
+import os
+import sys
+from subprocess import Popen, PIPE
 from subprocess import call as Call
 import yaml
 
 # Color + decoration for messages printed on terminal
 MESSAGES = {
-    'none' : (None, None),
-    'ok' : ('green', None),
+    'none': (None, None),
+    'ok': ('green', None),
     'info': ('blue', None),
-    'warning' : ('yellow', None),
-    'error' : ('red', 'bold'),
+    'warning': ('yellow', None),
+    'error': ('red', 'bold'),
 }
+
 
 class Color:
     COLORS = {
-        'red'       : '\033[91m',
-        'green'     : '\033[92m',
-        'yellow'    : '\033[93m',
-        'blue'      : '\033[94m',
+        'red': '\033[91m',
+        'green': '\033[92m',
+        'yellow': '\033[93m',
+        'blue': '\033[94m',
     }
 
-    DECORATIONS={
-        'bold'      : '\033[1m',
-        'underline' : '\033[4m',
+    DECORATIONS = {
+        'bold': '\033[1m',
+        'underline': '\033[4m',
     }
 
-    END= '\033[0m'
+    END = '\033[0m'
 
     @classmethod
     def text(cls, s, **kwargs):
@@ -46,6 +48,7 @@ class Color:
             msg += cls.END
         return (msg)
 
+
 class Defaults:
     SCM = 'git'
     SCM_VERSION = 'master'
@@ -58,13 +61,13 @@ class Defaults:
         if yml is not '':
             self.setvalues(yml)
         else:
-            raise Exception('%s not found or incorrect.' %path)
+            raise Exception('%s not found or incorrect.' % path)
 
     def load(self):
-        LOAD_ORDER=(
+        LOAD_ORDER = (
             path(pwd(), 'bundle.cfg'),
-            path(HOME, '.ansible', 'bundle', 'bundle.cfg' )
-            )
+            path(HOME, '.ansible', 'bundle', 'bundle.cfg')
+        )
         for filename in LOAD_ORDER:
             if isfile(filename):
                 return load(filename)
@@ -76,13 +79,15 @@ class Defaults:
             self.SCM_ROLES = self.SCM_PREFIX + self.SCM_ROLES
             self.SCM_MODULES = self.SCM_PREFIX + self.SCM_MODULES
 
+
 def load(filename):
     if os.path.isfile(filename):
         with open(filename, 'r') as fn:
             return yaml.load(fn)
 
+
 def echo(message, lr=True, typeOf=None):
-    if lr :
+    if lr:
         end = '\n'
     else:
         end = ' '
@@ -94,6 +99,7 @@ def echo(message, lr=True, typeOf=None):
     print(msg, end=end)
     sys.stdout.flush()
 
+
 def run(command):
     stdout = None
     stderr = None
@@ -103,26 +109,34 @@ def run(command):
     returncode = process.returncode
     return output, returncode
 
+
 def pwd():
     return os.getcwd()
+
 
 def exit(arg):
     return sys.exit(arg)
 
+
 def isfile(filename):
     return os.path.isfile(filename)
+
 
 def isdir(dirname):
     return os.path.exists(dirname)
 
+
 def path(*args):
     return os.path.join(*args)
+
 
 def call(args):
     return Call(args)
 
+
 def walk(args):
     return os.walk(args)
+
 
 def cd(dirname):
     return os.chdir(dirname)

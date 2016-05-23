@@ -3,6 +3,7 @@
 
 import shell
 
+
 class Git:
     url = None
     path = None
@@ -13,9 +14,10 @@ class Git:
         self.path = path
 
     def get(self, version):
-        cmd = [ 'git','clone', '--branch', version, '--depth', '1', self.url, self.path ]
+        cmd = ['git', 'clone', '--branch', version,
+               '--depth', '1', self.url, self.path]
         stdout, rc = shell.run(cmd)
-        if rc == shell.OK :
+        if rc == shell.OK:
             return True
         else:
             return False
@@ -30,7 +32,7 @@ class Git:
 
     def update(self):
         shell.cd(self.path)
-        cmd = ['git', 'pull', 'origin', self.branch() ]
+        cmd = ['git', 'pull', 'origin', self.branch()]
         stdout, rc = shell.run(cmd)
         shell.cd(shell.WORKDIR)
         if rc == shell.OK:
