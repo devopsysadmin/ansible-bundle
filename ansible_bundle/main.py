@@ -13,11 +13,13 @@ def get_arguments():
                         help='YML file to be processed (default:site.yml)')
     parser.add_argument('--run', action='store_true', dest='run_playbook',
                         default=False,
-                        help='Runs ansible-playbook with default params after \
-                        getting bundles')
+                        help='Runs ansible-playbook with default params' +
+                        ' after getting bundles')
     parser.add_argument('--args', dest='args', nargs='?',
-                        help='ansible-playbook arguments, if needed. Must be \
-                        put into quotes')
+                        help='ansible-playbook arguments, if needed. Must be' +
+                        ' put into quotes')
+    parser.add_argument('--clean', action='store_true', default=False,
+                        help='clean roles and libraries directories')
 
     return parser.parse_args()
 
@@ -57,16 +59,15 @@ def expand(contents):
     return yml
 
 
-def main():
-    params = get_arguments()
+def download(filename):
     downloaded = list()
 
     # End if file doesn't exist
-    if not shell.isfile(params.filename):
-        raise Exception('File %s not found' % params.filename)
+    if not shell.isfile(filename):
+        raise Exception('File %s not found' % filename)
 
     # Get contents and includes from main YML
-    yml = expand(shell.load(params.filename))
+    yml = expand(shell.load(filename))
 
     # Get bundles from main yml and its includes
     bundles = list()
@@ -85,14 +86,38 @@ def main():
         bundles = [item for item in bundles if item.name not in downloaded] + \
             [item for item in dependencies if item.name not in downloaded]
 
-    # After getting bundles, run playbook if set to
-    if params.run_playbook is True:
-        args = params.args.split() if params.args else list()
-        ansiblecmd = ['ansible-playbook', params.filename] + args
 
+def run_playbook(filename, args):
+        ansiblecmd = ['ansible-playbook', filename] + args
         shell.echo('Running', typeOf='info', lr=False)
         shell.echo(shell.Color.text(' '.join(ansiblecmd), decoration='bold'))
         shell.call(ansiblecmd)
+
+
+def clean_dirs(directories):
+    for directory in directories:
+        shell.echo('Cleaning %s directory...' %directory,
+                   typeOf='info', lr=False)
+        if shell.rmdir('roles') is True:
+            shell.echo('OK', typeOf='ok')
+        else:
+            shell.echo('ERROR', typeOf='error')
+
+
+
+def main():
+    params = get_arguments()
+
+    if params.clean is True:
+        clean_dirs(['roles'])
+
+    download(params.filename)
+
+    # After getting bundles, run playbook if set to
+    if params.run_playbook is True:
+        run_playbook(params.filename,
+                     params.args.split() if params.args else list()
+                    )
 
 ########################################################
 if __name__ == "__main__":

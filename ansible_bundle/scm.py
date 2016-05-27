@@ -9,7 +9,7 @@ class Git:
     path = None
     branch = None
 
-    def __init__(self, url, path, branch):
+    def __init__(self, url, path='.', branch='master'):
         self.url = url
         self.path = path
         self.branch = branch

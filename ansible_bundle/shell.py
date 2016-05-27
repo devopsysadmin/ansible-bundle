@@ -8,6 +8,7 @@ import sys
 from subprocess import Popen, PIPE
 from subprocess import call as Call
 import yaml
+import shutil
 
 # Color + decoration for messages printed on terminal
 MESSAGES = {
@@ -140,6 +141,17 @@ def walk(args):
 
 def cd(dirname):
     return os.chdir(dirname)
+
+def rmdir(dirname):
+    if os.path.exists(dirname):
+        try:
+            shutil.rmtree(dirname)
+            return True
+        except:
+            return False
+    else:
+        return True
+
 
 ###############################
 OK = 0
