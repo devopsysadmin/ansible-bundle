@@ -6,6 +6,8 @@ import argparse
 import shell
 from bundle import Bundle, PATH
 
+VERBOSITY=0
+
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -20,6 +22,8 @@ def get_arguments():
                         ' put into quotes')
     parser.add_argument('--clean', action='store_true', default=False,
                         help='clean roles and libraries directories')
+    parser.add_argument('-v', '--verbose', action='count', default=VERBOSITY,
+                        help='Be verbose on tasks')
 
     return parser.parse_args()
 
@@ -69,7 +73,7 @@ def download(bundle_list):
     while len(bundles) > 0:
         for bundle in bundles:
             bundles.remove(bundle)
-            if bundle.download() is True:
+            if bundle.download(verbose=VERBOSITY) is True:
                 downloaded.append(bundle.name)
             else:
                 return shell.ERROR
@@ -98,7 +102,10 @@ def clean_dirs(directories):
 
 
 def main():
+    global VERBOSITY
     params = get_arguments()
+
+    VERBOSITY = params.verbose
 
     if params.clean is True:
         clean_dirs(['roles'])

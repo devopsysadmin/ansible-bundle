@@ -62,8 +62,8 @@ class Bundle(object):
             path = shell.path(path, version)
         return path
 
-    def download(self):
-        git = Git(self.url, self.path, self.version)
+    def download(self, verbose = 0):
+        git = Git(self.url, self.path, self.version, verbose)
         if shell.isdir(self.path):
             msg = 'Updating'
             func = git.update

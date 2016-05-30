@@ -56,6 +56,7 @@ class Defaults:
     SCM_PREFIX = ''
     SCM_ROLES = ''
     SCM_MODULES = ''
+    VERBOSITY = 0
 
     def __init__(self):
         yml = self.load()
@@ -101,15 +102,15 @@ def echo(message, lr=True, typeOf=None):
     sys.stdout.flush()
 
 
-def run(command, verbose=False, show=False):
-    if show:
-        print((' '.join(command)))
+def run(command, verbose=0):
+    if verbose > 0:
+        print('\n[DEBUG IN]\n', ' '.join(command), '\n-------------------')
     process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
     stdout, stderr = process.communicate()
     output = stdout + stderr
     returncode = process.returncode
-    if verbose:
-        print (output)
+    if verbose > 0:
+        print ('\n[DEBUG OUT]\n', output, '\n-------------------')
     return output, returncode
 
 
