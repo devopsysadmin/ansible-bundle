@@ -101,13 +101,15 @@ def echo(message, lr=True, typeOf=None):
     sys.stdout.flush()
 
 
-def run(command):
-    stdout = None
-    stderr = None
+def run(command, verbose=False, show=False):
+    if show:
+        print((' '.join(command)))
     process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
     stdout, stderr = process.communicate()
     output = stdout + stderr
     returncode = process.returncode
+    if verbose:
+        print (output)
     return output, returncode
 
 

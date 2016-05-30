@@ -17,7 +17,7 @@ class Git:
     def get(self):
         cmd = ['git', 'clone', '--branch', self.branch,
                '--depth', '1', self.url, self.path]
-        stdout, rc = shell.run(cmd)
+        stdout, rc = shell.run(cmd, show=False)
         if rc == shell.OK:
             return True
         else:
