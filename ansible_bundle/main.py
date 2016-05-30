@@ -48,32 +48,24 @@ def get_bundles_from(yml):
     return list(set(bundles))
 
 
-def expand(contents):
-    yml = list()
-    for element in contents:
-        include = element.get('include', None)
-        if include:
-            yml += (shell.load(include))
-        else:
-            yml += element
-    return yml
-
-
-def download(filename):
-    downloaded = list()
-
-    # End if file doesn't exist
+def load_bundles(filename):
     if not shell.isfile(filename):
         raise Exception('File %s not found' % filename)
 
-    # Get contents and includes from main YML
-    yml = expand(shell.load(filename))
-
-    # Get bundles from main yml and its includes
-    bundles = list()
+    bundlelist=list()
+    yml = shell.load(filename)
     for item in yml:
-        bundles += get_bundles_from(item)
+        include = item.get('include', None)
+        if include:
+            bundlelist += load_bundles(shell.load(include))
+        else:
+            bundlelist += get_bundles_from(item)
+    return bundlelist
 
+
+def download(bundle_list):
+    bundles = list(set(bundle_list))
+    downloaded = list()
     while len(bundles) > 0:
         for bundle in bundles:
             bundles.remove(bundle)
@@ -111,7 +103,8 @@ def main():
     if params.clean is True:
         clean_dirs(['roles'])
 
-    download(params.filename)
+    bundles = load_bundles(params.filename)
+    download(bundles)
 
     # After getting bundles, run playbook if set to
     if params.run_playbook is True:
