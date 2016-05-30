@@ -27,8 +27,6 @@ setup(name='ansible-bundle',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
           'Operating System :: OS Independent',
-          'Topic :: Utilities',
-          'Programming Languange :: Python ::3',
-          'Programming Languange :: Python ::3.4',
+          'Topic :: Utilities'
       ]
 )
