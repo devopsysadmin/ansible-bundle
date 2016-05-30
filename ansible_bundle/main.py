@@ -43,32 +43,36 @@ def get_bundles_from(yml):
     for bundle in yml.get('roles', list()):
         b = Bundle('role', bundle)
         bundles.append(b)
-
     for bundle in yml.get('dependencies', list()):
         if bundle.get('role', None):
             b = Bundle('role', bundle)
             bundles.append(b)
-
-    return list(set(bundles))
+    return bundles
 
 
 def load_bundles(filename):
+    if filename is None: return list()
     if not shell.isfile(filename):
         raise Exception('File %s not found' % filename)
-
     bundlelist=list()
     yml = shell.load(filename)
     for item in yml:
-        include = item.get('include', None)
-        if include:
-            bundlelist += load_bundles(shell.load(include))
-        else:
-            bundlelist += get_bundles_from(item)
+        bundlelist += load_bundles(item.get('include', None)) +\
+                      get_bundles_from(item)
     return bundlelist
 
+def purify(array):
+    elements = list()
+    pure = list()
+    for item in array:
+        if (item.name, item.version) not in elements:
+            pure.append(item)
+            elements.append((item.name, item.version))
+    return pure
 
-def download(bundle_list):
-    bundles = list(set(bundle_list))
+
+def download(filename):
+    bundles = purify(load_bundles(filename))
     downloaded = list()
     while len(bundles) > 0:
         for bundle in bundles:
@@ -110,8 +114,7 @@ def main():
     if params.clean is True:
         clean_dirs(['roles'])
 
-    bundles = load_bundles(params.filename)
-    download(bundles)
+    download(params.filename)
 
     # After getting bundles, run playbook if set to
     if params.run_playbook is True:
