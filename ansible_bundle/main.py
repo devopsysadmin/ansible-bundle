@@ -9,7 +9,7 @@ from bundle import Bundle, PATH
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', dest='filename', default='site.yml',
+    parser.add_argument('-f', '--file', dest='filename', default='site.yml',
                         help='YML file to be processed (default:site.yml)')
     parser.add_argument('--run', action='store_true', dest='run_playbook',
                         default=False,

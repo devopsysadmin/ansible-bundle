@@ -1,2 +1,1 @@
 ansible>=2.0
-dulwich==0.13.0
