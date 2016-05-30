@@ -78,13 +78,13 @@ def download(filename, verbose=DEFAULT_VERBOSITY):
         for bundle in bundles:
             bundles.remove(bundle)
             if bundle.download(verbose=verbose) is True:
-                already_downloaded.append(bundle.name)
+                already_downloaded.append((bundle.name, bundle.version))
             else:
                 return shell.ERROR
         dependencies = get_dependencies_tree(
             PATH['role']) + get_dependencies_tree(PATH['library'])
-        bundles = [item for item in bundles if item.name not in already_downloaded] + \
-            [item for item in dependencies if item.name not in already_downloaded]
+        bundles = [item for item in bundles if (item.name, item.version) not in already_downloaded] + \
+            [item for item in dependencies if (item.name, item.version) not in already_downloaded]
 
 
 def run_playbook(filename, args):
