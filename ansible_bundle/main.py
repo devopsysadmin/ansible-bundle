@@ -6,8 +6,7 @@ import argparse
 import shell
 from bundle import Bundle, PATH
 
-VERBOSITY=0
-
+DEFAULT_VERBOSITY=0
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -65,26 +64,27 @@ def purify(array):
     elements = list()
     pure = list()
     for item in array:
-        if (item.name, item.version) not in elements:
+        element = (item.name, item.version)
+        if element not in elements:
             pure.append(item)
-            elements.append((item.name, item.version))
+            elements.append(element)
     return pure
 
 
-def download(filename):
+def download(filename, verbose=DEFAULT_VERBOSITY):
     bundles = purify(load_bundles(filename))
-    downloaded = list()
+    already_downloaded = list()
     while len(bundles) > 0:
         for bundle in bundles:
             bundles.remove(bundle)
-            if bundle.download(verbose=VERBOSITY) is True:
-                downloaded.append(bundle.name)
+            if bundle.download(verbose=verbose) is True:
+                already_downloaded.append(bundle.name)
             else:
                 return shell.ERROR
         dependencies = get_dependencies_tree(
             PATH['role']) + get_dependencies_tree(PATH['library'])
-        bundles = [item for item in bundles if item.name not in downloaded] + \
-            [item for item in dependencies if item.name not in downloaded]
+        bundles = [item for item in bundles if item.name not in already_downloaded] + \
+            [item for item in dependencies if item.name not in already_downloaded]
 
 
 def run_playbook(filename, args):
@@ -109,12 +109,13 @@ def main():
     global VERBOSITY
     params = get_arguments()
 
-    VERBOSITY = params.verbose
-
     if params.clean is True:
         clean_dirs(['roles'])
 
-    download(params.filename)
+    download(
+            filename=params.filename, 
+            verbose=params.verbose
+            )
 
     # After getting bundles, run playbook if set to
     if params.run_playbook is True:
