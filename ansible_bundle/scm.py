@@ -26,7 +26,7 @@ class Git:
             return False
 
     def update(self):
-        shell.cd(self.path)
+        shell.cd(self.path, verbose=self.verbose)
         cmd = ['git', 'pull', 'origin', self.branch]
         stdout, rc = shell.run(cmd, verbose=self.verbose)
         shell.cd(shell.WORKDIR)

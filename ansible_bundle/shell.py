@@ -142,8 +142,11 @@ def walk(args):
     return os.walk(args)
 
 
-def cd(dirname):
-    return os.chdir(dirname)
+def cd(dirname, verbose=0):
+    retval = os.chdir(dirname)
+    if retval and verbose > 0:
+        print('[DEBUG]: Current dir is %s' %dirname)
+    return retval
 
 def rmdir(dirname):
     if os.path.exists(dirname):
