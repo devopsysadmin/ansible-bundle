@@ -21,7 +21,7 @@ def get_arguments():
                         ' put into quotes')
     parser.add_argument('--clean', action='store_true', default=False,
                         help='clean roles and libraries directories')
-    parser.add_argument('-v', '--verbose', action='count', default=VERBOSITY,
+    parser.add_argument('-v', '--verbose', action='count', default=DEFAULT_VERBOSITY,
                         help='Be verbose on tasks')
 
     return parser.parse_args()
