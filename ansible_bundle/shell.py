@@ -10,13 +10,20 @@ from subprocess import call as Call
 import yaml
 import shutil
 
+QUIET = 0
+VERBOSE = 1
+DEBUG = 2
+
+DOTS = '\n-------------------'
+
 # Color + decoration for messages printed on terminal
 MESSAGES = {
     'none': (None, None),
-    'ok': ('green', None),
+    'ok': ('green', 'bold'),
     'info': ('blue', None),
     'warning': ('yellow', None),
     'error': ('red', 'bold'),
+    'debug': ('magenta', 'bold')
 }
 
 
@@ -26,6 +33,7 @@ class Color:
         'green': '\033[92m',
         'yellow': '\033[93m',
         'blue': '\033[94m',
+        'magenta' : '\033[95m',
     }
 
     DECORATIONS = {
@@ -56,7 +64,7 @@ class Defaults:
     SCM_PREFIX = ''
     SCM_ROLES = ''
     SCM_MODULES = ''
-    VERBOSITY = 0
+    QUIET = 0
 
     def __init__(self):
         yml = self.load()
@@ -101,16 +109,19 @@ def echo(message, lr=True, typeOf=None):
     print(msg, end=end)
     sys.stdout.flush()
 
+def echo_debug(message):
+    echo('[DEBUG] ', lr=False, typeOf='debug')
+    echo(message)
 
-def run(command, verbose=0):
-    if verbose > 0:
-        print('\n[DEBUG IN]\n', ' '.join(command), '\n-------------------')
+def run(command, verbose=QUIET):
+    if verbose >= DEBUG:
+        echo_debug('IN:\n' + ' '.join(command)+'\n')
     process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
     stdout, stderr = process.communicate()
     output = stdout + stderr
     returncode = process.returncode
-    if verbose > 0:
-        print ('\n[DEBUG OUT]\n', output, '\n-------------------')
+    if verbose >= DEBUG:
+        echo_debug ('OUT:\n' + output + DOTS)
     return output, returncode
 
 
@@ -142,10 +153,15 @@ def walk(args):
     return os.walk(args)
 
 
-def cd(dirname, verbose=0):
-    retval = os.chdir(dirname)
-    if retval and verbose > 0:
-        print('[DEBUG]: Current dir is %s' %dirname)
+def cd(dirname, verbose=QUIET):
+    try:
+        os.chdir(dirname)
+        retval=True
+    except:
+        retval=False
+
+    if retval and verbose >= DEBUG:
+        echo_debug('Current dir is ' + dirname + DOTS)
     return retval
 
 def rmdir(dirname):

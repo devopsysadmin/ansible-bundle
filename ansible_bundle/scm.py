@@ -10,7 +10,7 @@ class Git:
     branch = None
     verbose = False
 
-    def __init__(self, url, path='.', branch='master', verbose=0):
+    def __init__(self, url, path='.', branch='master', verbose=shell.QUIET):
         self.url = url
         self.path = path
         self.branch = branch

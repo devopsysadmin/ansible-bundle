@@ -71,7 +71,7 @@ class Bundle(object):
         )
         return string
 
-    def download(self, verbose = 0):
+    def download(self, verbose = shell.QUIET):
         git = Git(self.url, self.path, self.version, verbose)
         if shell.isdir(self.path):
             msg = 'Updating'
@@ -79,12 +79,15 @@ class Bundle(object):
         else:
             msg = 'Getting'
             func = git.get
-        shell.echo('%s %s from %s (%s)...' % (msg, self.name,
-                                              self.url, self.version),
-                   typeOf='info', lr=False)
+        if verbose < shell.DEBUG:
+            shell.echo('%s %s from %s (%s)...' % (msg, self.name,
+                                                  self.url, self.version),
+                       typeOf='info', lr=False
+                       )
         ok = func()
-        if ok:
-            shell.echo('OK', typeOf='ok')
-        else:
-            shell.echo('ERROR', typeOf='error')
+        if verbose < shell.DEBUG:
+            if ok:
+                shell.echo('OK', typeOf='ok')
+            else:
+                shell.echo('ERROR', typeOf='error')
         return ok

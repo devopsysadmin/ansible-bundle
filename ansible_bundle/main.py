@@ -6,7 +6,7 @@ import argparse
 import shell
 from bundle import Bundle, PATH
 
-DEFAULT_VERBOSITY=0
+DEFAULT_VERBOSITY=shell.QUIET
 
 def get_arguments():
     parser = argparse.ArgumentParser()
