@@ -27,7 +27,7 @@ class Git:
 
     def update(self):
         shell.cd(self.path, verbose=self.verbose)
-        cmd = ['git', 'pull', 'origin', self.branch]
+        cmd = ['git', 'fetch', 'origin', self.branch]
         stdout, rc = shell.run(cmd, verbose=self.verbose)
         shell.cd(shell.WORKDIR)
         if rc == shell.OK:
