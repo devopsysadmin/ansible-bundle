@@ -125,9 +125,12 @@ def main():
 
     # After getting bundles, run playbook if set to
     if params.run_playbook is True:
-        run_playbook(params.filename,
-                     params.args.split() if params.args else list()
-                    )
+        if params.dry is True:
+            shell.echo_warning('--run passed and --dry set to true. End.')
+        else:
+            run_playbook(params.filename,
+                         params.args.split() if params.args else list()
+                        )
 
 ########################################################
 if __name__ == "__main__":

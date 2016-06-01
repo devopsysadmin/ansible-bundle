@@ -81,9 +81,10 @@ class Bundle(object):
             msg = 'Getting'
             func = git.get
         if shell.config.verbose < defaults.DEBUG:
-            shell.echo('%s %s (%s)...' % (msg, self.name, self.version),
-                       typeOf='info', lr=False
-                       )
+            shell.echo_info ('%s %s (%s)...' %
+                                (msg, self.name, self.version),
+                            lr=False
+                            )
         ok = func()
         if shell.config.verbose < defaults.DEBUG:
             if ok:

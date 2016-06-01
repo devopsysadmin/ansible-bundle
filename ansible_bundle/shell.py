@@ -29,7 +29,7 @@ def echo(message, lr=True, typeOf=None, stderr=False):
     if lr:
         end = '\n'
     else:
-        end = ' '
+        end = ''
     if typeOf:
         color, decoration = defaults.MESSAGES[typeOf]
         msg = Color.text(message, color=color, decoration=decoration)
@@ -43,11 +43,16 @@ def echo(message, lr=True, typeOf=None, stderr=False):
 
 def echo_debug(message):
     echo('[DEBUG] ', lr=False, typeOf='debug')
-    echo(message)
+    echo(message, lr=True)
 
 def echo_error(message):
-    echo('[ERROR]', lr=False, typeOf='error', stderr=True)
-    echo(message, typeOf='error', stderr=True)
+    echo('[ERROR] %s' %message, typeOf='error', stderr=True)
+
+def echo_info(message, lr=False):
+    echo('[INFO] %s' %message, typeOf='info', lr=lr)
+
+def echo_warning(message):
+    echo('[WARN] %s' %message, typeOf='warning')
 
 def run(command):
     if config.verbose >= defaults.DEBUG:

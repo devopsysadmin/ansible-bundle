@@ -34,6 +34,8 @@ The most basic usage is running `ansible-bundle` with no parameters. This will d
 
 - `--run` Run `ansible-playbook` after finishing
 
+- `--dry` will perform a 
+
 # Configuration
 
 By now, ansible-bundle expects to find a `bundle.cfg` file within the current 
