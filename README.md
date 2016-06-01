@@ -2,14 +2,6 @@
 
 Small tool for automatic download roles and libs a-la-Gemfile
 
-# Author
-
-David Pedersen (david.3pwood AT gmail DOT com)
-
-# License
-
-GNU Public License v2 (GPLv2)
-
 # Preamble
 
 As many roles have changed their configurations among time, anyone would use a
@@ -33,7 +25,7 @@ download bundles found on `site.yml` and its include files.
 
 - `-f | --file` Use another file instead of `site.yml`
 
-- `-v` Sets verbose mode
+- `-v` Sets verbose mode. Can be repeated to increase verbosity level.
 
 - `--args` Arguments bypassed to `ansible-playbook`. Must be put under quotes.
 
@@ -89,7 +81,6 @@ section:
 
 Given the following playbook (site.yml):
 
-```
 		- include: site-common.yml
 		  tags:
 		    - common
@@ -98,11 +89,18 @@ Given the following playbook (site.yml):
 		  roles:
 		    - postgresql/1.0
 		    - { role: apache, version: '2.4' }
-```
 
-Running `ansible-bundle` will search roles into the site-common.yml file and 
-download them. Also, will download role postgresql (branch 1.0) and apache
+Running `ansible-bundle` will search roles into the `site-common.yml` file and 
+download them. Also, will download role postgresql (branch/tag 1.0) and apache
 (master).
 
 In further releases, the way to say the version to be downloaded will change in
 order to be more like ansible-galaxy.
+
+# Author
+
+David Pedersen (david.3pwood AT gmail DOT com)
+
+# License
+
+GNU Public License v2 (GPLv2)
