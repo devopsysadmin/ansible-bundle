@@ -2,11 +2,12 @@
 # -*- encoding: utf8 -*-
 #
 
+import defaults
 import shell
 from scm import Git
 
 WORKDIR = shell.WORKDIR
-DEFAULTS = shell.DEFAULTS
+CONFIG = shell.config
 
 PATH = {
     'role': 'roles/',
@@ -31,14 +32,14 @@ class Role(object):
         else:
             split = raw.split('/')
         name = split[0]
-        version = split[1] if len(split) > 1 else DEFAULTS.SCM_VERSION
+        version = split[1] if len(split) > 1 else CONFIG.SCM_VERSION
         return name, version
 
     def generate_url(self, name):
-        return '%s/%s' % (DEFAULTS.SCM_ROLES, name)
+        return '%s/%s' % (CONFIG.SCM_ROLES, name)
 
     def generate_path(self, name, version):
-        if version == DEFAULTS.SCM_VERSION:
+        if version == CONFIG.SCM_VERSION:
             return shell.path(WORKDIR, PATH['role'], 'unversioned', name)
         else:
             return shell.path(WORKDIR, PATH['role'], name, version)
@@ -71,21 +72,20 @@ class Bundle(object):
         )
         return string
 
-    def download(self, verbose = shell.QUIET):
-        git = Git(self.url, self.path, self.version, verbose)
+    def download(self):
+        git = Git(self.url, self.path, self.version)
         if shell.isdir(self.path):
             msg = 'Updating'
             func = git.update
         else:
             msg = 'Getting'
             func = git.get
-        if verbose < shell.DEBUG:
-            shell.echo('%s %s from %s (%s)...' % (msg, self.name,
-                                                  self.url, self.version),
+        if shell.config.verbose < defaults.DEBUG:
+            shell.echo('%s %s (%s)...' % (msg, self.name, self.version),
                        typeOf='info', lr=False
                        )
         ok = func()
-        if verbose < shell.DEBUG:
+        if shell.config.verbose < defaults.DEBUG:
             if ok:
                 shell.echo('OK', typeOf='ok')
             else:

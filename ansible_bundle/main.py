@@ -4,25 +4,31 @@
 
 import argparse
 import shell
+import defaults
 from bundle import Bundle, PATH
 
-DEFAULT_VERBOSITY=shell.QUIET
+DEFAULT_VERBOSITY=defaults.QUIET
+DEFAULT_DRY=defaults.DRY
+DEFAULT_CLEAN=defaults.CLEAN
+DEFAULT_RUN=defaults.RUN
 
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--file', dest='filename', default='site.yml',
                         help='YML file to be processed (default:site.yml)')
     parser.add_argument('--run', action='store_true', dest='run_playbook',
-                        default=False,
+                        default=DEFAULT_RUN,
                         help='Runs ansible-playbook with default params' +
                         ' after getting bundles')
     parser.add_argument('--args', dest='args', nargs='?',
                         help='ansible-playbook arguments, if needed. Must be' +
                         ' put into quotes')
-    parser.add_argument('--clean', action='store_true', default=False,
+    parser.add_argument('--clean', action='store_true', default=DEFAULT_CLEAN,
                         help='clean roles and libraries directories')
     parser.add_argument('-v', '--verbose', action='count', default=DEFAULT_VERBOSITY,
                         help='Be verbose on tasks')
+    parser.add_argument('--dry', action='store_true', default=DEFAULT_DRY,
+                        help='Will give info about the changes to be performed')
 
     return parser.parse_args()
 
@@ -52,7 +58,8 @@ def get_bundles_from(yml):
 def load_bundles(filename):
     if filename is None: return list()
     if not shell.isfile(filename):
-        raise Exception('File %s not found' % filename)
+        shell.echo_error('File %s not found' % filename)
+        shell.exit(defaults.ERROR)
     bundlelist=list()
     yml = shell.load(filename)
     for item in yml:
@@ -71,13 +78,13 @@ def purify(array):
     return pure
 
 
-def download(filename, verbose=DEFAULT_VERBOSITY):
+def download(filename):
     bundles = purify(load_bundles(filename))
     already_downloaded = list()
     while len(bundles) > 0:
         for bundle in bundles:
             bundles.remove(bundle)
-            if bundle.download(verbose=verbose) is True:
+            if bundle.download() is True:
                 already_downloaded.append((bundle.name, bundle.version))
             else:
                 return shell.ERROR
@@ -106,16 +113,15 @@ def clean_dirs(directories):
 
 
 def main():
-    global VERBOSITY
     params = get_arguments()
+
+    shell.config.verbose = params.verbose
+    shell.config.dry = params.dry
 
     if params.clean is True:
         clean_dirs(['roles'])
 
-    download(
-            filename=params.filename, 
-            verbose=params.verbose
-            )
+    download(filename=params.filename)
 
     # After getting bundles, run playbook if set to
     if params.run_playbook is True:

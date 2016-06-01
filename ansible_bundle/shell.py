@@ -9,86 +9,15 @@ from subprocess import Popen, PIPE
 from subprocess import call as Call
 import yaml
 import shutil
+import defaults
 
-QUIET = 0
-VERBOSE = 1
-DEBUG = 2
+Color = defaults.Color
+OK = defaults.OK
+ERROR = defaults.ERROR
+HOME = defaults.HOME
+WORKDIR = defaults.WORKDIR
 
-DOTS = '\n-------------------'
-
-# Color + decoration for messages printed on terminal
-MESSAGES = {
-    'none': (None, None),
-    'ok': ('green', 'bold'),
-    'info': ('blue', None),
-    'warning': ('yellow', None),
-    'error': ('red', 'bold'),
-    'debug': ('magenta', 'bold')
-}
-
-
-class Color:
-    COLORS = {
-        'red': '\033[91m',
-        'green': '\033[92m',
-        'yellow': '\033[93m',
-        'blue': '\033[94m',
-        'magenta' : '\033[95m',
-    }
-
-    DECORATIONS = {
-        'bold': '\033[1m',
-        'underline': '\033[4m',
-    }
-
-    END = '\033[0m'
-
-    @classmethod
-    def text(cls, s, **kwargs):
-        msg = ''
-        color = kwargs.get('color', None)
-        decoration = kwargs.get('decoration', None)
-        if decoration is not None:
-            msg += cls.DECORATIONS[decoration]
-        if color is not None:
-            msg += cls.COLORS[color]
-        msg += s
-        if color or decoration:
-            msg += cls.END
-        return (msg)
-
-
-class Defaults:
-    SCM = 'git'
-    SCM_VERSION = 'master'
-    SCM_PREFIX = ''
-    SCM_ROLES = ''
-    SCM_MODULES = ''
-    QUIET = 0
-
-    def __init__(self):
-        yml = self.load()
-        if yml is not '':
-            self.setvalues(yml)
-        else:
-            raise Exception('%s not found or incorrect.' % path)
-
-    def load(self):
-        LOAD_ORDER = (
-            path(pwd(), 'bundle.cfg'),
-            path(HOME, '.ansible', 'bundle', 'bundle.cfg')
-        )
-        for filename in LOAD_ORDER:
-            if isfile(filename):
-                return load(filename)
-
-    def setvalues(self, yml):
-        for key, value in yml.items():
-            setattr(self, key, value)
-        if self.SCM_PREFIX:
-            self.SCM_ROLES = self.SCM_PREFIX + self.SCM_ROLES
-            self.SCM_MODULES = self.SCM_PREFIX + self.SCM_MODULES
-
+config = defaults.Config()
 
 def load(filename):
     if os.path.isfile(filename):
@@ -96,32 +25,42 @@ def load(filename):
             return yaml.load(fn)
 
 
-def echo(message, lr=True, typeOf=None):
+def echo(message, lr=True, typeOf=None, stderr=False):
     if lr:
         end = '\n'
     else:
         end = ' '
     if typeOf:
-        color, decoration = MESSAGES[typeOf]
+        color, decoration = defaults.MESSAGES[typeOf]
         msg = Color.text(message, color=color, decoration=decoration)
     else:
         msg = message
-    print(msg, end=end)
+    if stderr:
+        print(msg, end=end, file=sys.stderr)
+    else:
+        print(msg, end=end)
     sys.stdout.flush()
 
 def echo_debug(message):
     echo('[DEBUG] ', lr=False, typeOf='debug')
     echo(message)
 
-def run(command, verbose=QUIET):
-    if verbose >= DEBUG:
+def echo_error(message):
+    echo('[ERROR]', lr=False, typeOf='error', stderr=True)
+    echo(message, typeOf='error', stderr=True)
+
+def run(command):
+    if config.verbose >= defaults.DEBUG:
         echo_debug('IN:\n' + ' '.join(command)+'\n')
-    process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = process.communicate()
-    output = stdout + stderr
-    returncode = process.returncode
-    if verbose >= DEBUG:
-        echo_debug ('OUT:\n' + output + DOTS)
+    if config.dry is False:
+        process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = process.communicate()
+        output = stdout + stderr
+        returncode = process.returncode
+    else:
+        output, returncode = ('OK', 0)
+    if config.verbose >= defaults.DEBUG:
+        echo_debug ('OUT:\n' + output + defaults.DOTS)
     return output, returncode
 
 
@@ -153,15 +92,15 @@ def walk(args):
     return os.walk(args)
 
 
-def cd(dirname, verbose=QUIET):
+def cd(dirname):
     try:
         os.chdir(dirname)
         retval=True
     except:
         retval=False
 
-    if retval and verbose >= DEBUG:
-        echo_debug('Current dir is ' + dirname + DOTS)
+    if retval and config.verbose >= defaults.DEBUG:
+        echo_debug('Current dir is ' + dirname + defaults.DOTS)
     return retval
 
 def rmdir(dirname):
@@ -176,8 +115,3 @@ def rmdir(dirname):
 
 
 ###############################
-OK = 0
-ERROR = 1
-HOME = os.getenv('HOME')
-DEFAULTS = Defaults()
-WORKDIR = os.getcwd()
