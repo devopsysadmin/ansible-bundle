@@ -15,6 +15,11 @@ class Git:
         self.path = path
         self.branch = branch
 
+    def _is_branch(self):
+        with open(shell.path('.git', 'HEAD')) as fn:
+            ref = fn.read()
+        return self.branch in ref
+
     def get(self):
         cmd = ['git', 'clone', '--branch', self.branch,
                '--depth', '1', self.url, self.path]
@@ -26,10 +31,16 @@ class Git:
 
     def update(self):
         shell.cd(self.path)
-        cmd = ['git', 'fetch', 'origin', self.branch]
-        stdout, rc = shell.run(cmd)
-        shell.cd(shell.WORKDIR)
-        if rc == shell.OK:
-            return True
-        else:
-            return False
+        if self._is_branch():
+            cmds = (
+                ['git', 'checkout', '.'],
+                ['git', 'pull', '--rebase', 'origin', self.branch],
+                )
+            for cmd in cmds:
+                stdout, rc = shell.run(cmd)
+                if rc == shell.ERROR:
+                    return False
+            shell.cd(shell.WORKDIR)
+        elif shell.config.verbose > defaults.QUIET:
+            shell.echo_info('Current branch is really a tag. Skip.\n')
+        return True
