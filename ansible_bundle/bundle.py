@@ -51,12 +51,30 @@ class Bundle(object):
     path = None
     version = None
     url = None
+    properties = (name, version)
+
+    @classmethod
+    def from_dict(bundle, json):
+        if isinstance(json, dict):
+            if json.get('role', None):
+                return bundle('role', json)
+        else:
+            return bundle('role', json)
+
+    def dependencies(self):
+        deps = list()
+        meta = shell.path(self.path, 'meta', 'main.yml')
+        if shell.isfile(meta):
+            for dep in shell.load(meta).get('dependencies'):
+                deps.append(Bundle.from_dict(dep))
+        return deps
 
     def __init__(self, typeof, raw):
         if typeof == 'role':
             bundle = Role(raw)
         for key in ('name', 'path', 'version', 'url'):
             setattr(self, key, getattr(bundle, key))
+        self.__update_properties()
 
     def __str__(self):
         string = """
@@ -71,6 +89,9 @@ class Bundle(object):
             self.url
         )
         return string
+
+    def __update_properties(self):
+        self.properties = (self.name, self.version)
 
     def download(self):
         git = Git(self.url, self.path, self.version)
