@@ -6,9 +6,9 @@ import sys
 
 p = Popen(['git', 'tag'], stdout=PIPE, stderr=PIPE)
 stdout, stderr = p.communicate()
-print stdout
+version = stdout.split('\n')[-2]
+print version
 sys.exit(1)
-version = stdout.split('\n')[-1]
 
 setup(name='ansible-bundle',
       version=version,
