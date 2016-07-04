@@ -18,8 +18,8 @@ downloaded = list()
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file', dest='filename', default='site.yml',
-                        help='YML file to be processed (default:site.yml)')
+    parser.add_argument('-f', '--file', dest='filename',
+                        help='YML file to be processed')
     parser.add_argument('--run', action='store_true', dest='run_playbook',
                         default=DEFAULT_RUN,
                         help='Runs ansible-playbook with default params' +
@@ -34,7 +34,7 @@ def get_arguments():
     parser.add_argument('--dry', action='store_true', default=DEFAULT_DRY,
                         help='Will give info about the changes to be performed')
 
-    return parser.parse_args()
+    return parser.parse_args(), parser
 
 
 def run_playbook(filename, args):
@@ -84,7 +84,13 @@ def items(bundle, yml):
     return [ item for sublist in [ item.get(bundle) for item in yml if item.get(bundle) ] for item in sublist ]
 
 def main():
-    params = get_arguments()
+    params, parser = get_arguments()
+
+    if not params.filename:
+        parser.print_help()
+        print ''
+        shell.echo_error('No file name specified')
+        shell.exit(defaults.ERROR)
 
     shell.config.verbose = params.verbose
     shell.config.dry = params.dry
