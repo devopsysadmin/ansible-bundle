@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from ansible_bundle import __version__
 from setuptools import setup, find_packages
+from subprocess import Popen, PIPE
+
+stdout, ercode = Popen(['git', 'tag'], stdout=PIPE)
+version = stdout.split('\n')[-1]
 
 setup(name='ansible-bundle',
-      version=__version__,
+      version=version,
       description="Manage ansible role and modules versioned dependencies.",
       long_description=open('README.md').read(),
       keywords='ansible roles modules',
