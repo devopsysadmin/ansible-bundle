@@ -3,8 +3,9 @@
 from setuptools import setup, find_packages
 from subprocess import Popen, PIPE
 
-p = Popen(['git', 'tag'], stdout=PIPE)
-version = p.communicate().split('\n')[-1]
+p = Popen(['git', 'tag'], stdout=PIPE, stderr=PIPE)
+stdout, stderr = p.communicate()
+version = stdout.split('\n')[-1]
 
 setup(name='ansible-bundle',
       version=version,
