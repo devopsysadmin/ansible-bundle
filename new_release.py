@@ -12,22 +12,36 @@ def get_arguments():
 def get_version():
 	p = Popen(['git', 'tag'], stdout=PIPE, stderr=PIPE)
 	stdout, stderr = p.communicate()
-	stdout.split('\n')[-2] # Last line is always empty, so take previous
-	return version.split('.')
+	# Last line is always empty, so take previous
+	return stdout.split('\n')[-2].split('.')
 
-def increase(pos):
-	version = get_version()
-	version[pos] = str(int(version[pos])+1)
-	return '%s.%s.%s' %(version[0], version[1], version[2])
+def increase(string):
+	return str(int(string)+1)
+
+def increase_patch():
+	major, minor, patch = get_version()
+	patch = increase(patch)
+	return '%s.%s.%s' %(major, minor, patch)
+
+def increase_minor():
+	major, minor, patch = get_version()
+	minor = increase(minor)
+	return '%s.%s.0' %(major, minor)
+
+def increase_major():
+	major, minor, patch = get_version()
+	major = increase(major)
+	return '%s.0.0' %major
 
 def main():
 	args = get_arguments()
 	if args.major:
-		version = increase(0)
+		version = increase_major()
 	elif args.minor:
-		version = increase(1)
+		version = increase_minor()
 	else:
-		version = increase(2)
+		version = increase_patch()
+	print version
 	call (['git', 'tag', version])
 	call (['git', 'push', '--tags'])
 	call (['python', 'setup.py', 'sdist', 'upload', '-r', 'pypi'])
