@@ -21,18 +21,12 @@ download bundles found on `site.yml` and its include files.
 
 # Parameters
 
-- `-c | --clean` Will clean roles and library directories before download
-
-- `-f | --file` Use another file instead of `site.yml`
+- `--bundle-clean-roles` Will clean roles and library directories before download
 
 - `-v` Sets verbose mode. Can be repeated to increase verbosity level.
 
-- `--args` Arguments bypassed to `ansible-playbook`. Must be put under quotes.
-
-- `--run` Run `ansible-playbook` after finishing
-
-- `--dry` will perform a dry run. showing what will be run (as it won't 
-download anything, also won't search for dependencies)
+- `--bundle-dry` Shows what will be run (as it won't download anything, 
+also won't search for dependencies)
 
 # Configuration
 

@@ -65,7 +65,9 @@ class Bundle(object):
         deps = list()
         meta = shell.path(self.path, 'meta', 'main.yml')
         if shell.isfile(meta):
-            for dep in shell.load(meta).get('dependencies'):
+            contents = shell.load(meta)
+            if contents is None: contents = dict()
+            for dep in contents.get('dependencies', list()):
                 deps.append(Bundle.from_dict(dep))
         return deps
 
