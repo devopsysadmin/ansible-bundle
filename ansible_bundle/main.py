@@ -7,6 +7,8 @@ import shell
 import defaults
 from bundle import Bundle, PATH
 import shlex
+import sys
+from subprocess import call
 
 DEFAULT_VERBOSITY=defaults.QUIET
 DEFAULT_DRY=defaults.DRY
@@ -18,33 +20,13 @@ downloaded = list()
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file', dest='filename',
-                        help='YML file to be processed')
-    parser.add_argument('--run', action='store_true', dest='run_playbook',
-                        default=DEFAULT_RUN,
-                        help='Runs ansible-playbook with default params' +
-                        ' after getting bundles')
-    parser.add_argument('--args', dest='args', nargs='?',
-                        help='ansible-playbook arguments, if needed. Must be' +
-                        ' put into quotes')
-    parser.add_argument('--clean', action='store_true', default=DEFAULT_CLEAN,
+    parser.add_argument('filename', help='YML file to be processed')
+    parser.add_argument('--bundle-clean-roles', dest='clean', action='store_true', default=DEFAULT_CLEAN,
                         help='clean roles and libraries directories')
-    parser.add_argument('-v', '--verbose', action='count', default=DEFAULT_VERBOSITY,
-                        help='Be verbose on tasks')
-    parser.add_argument('--dry', action='store_true', default=DEFAULT_DRY,
+    parser.add_argument('--bundle-dry', dest='dry', action='store_true', default=DEFAULT_DRY,
                         help='Will give info about the changes to be performed')
-
-    return parser.parse_args(), parser
-
-
-def run_playbook(filename, args):
-        ## str.split() splits even doble quotes. Shlex.split() surpasses them
-        args_array = shlex.split(args)
-        print('')
-        ansiblecmd = ['ansible-playbook' ] + args_array + [ filename ]
-        shell.echo('Running ', typeOf='info', lr=False)
-        shell.echo(shell.Color.text(' '.join(ansiblecmd), decoration='bold'))
-        shell.call(ansiblecmd)
+    parser.add_argument('-v', '--verbose', action='count')
+    return parser.parse_known_args()
 
 
 def clean_dirs(directories):
@@ -73,6 +55,14 @@ def load_site(filename):
             bundlelist.append(item)
     return bundlelist
 
+def run_playbook(filename, ansible_params, verbosity=0):
+    cmd = [ 'ansible-playbook', filename ] + ansible_params
+    if verbosity > 0 : cmd += [ '-'+('v'*verbosity) ]
+    try:
+        call(cmd)
+    except:
+        pass
+
 def download(bundle):
     if bundle.properties not in downloaded:
         bundle.download()
@@ -84,7 +74,7 @@ def items(bundle, yml):
     return [ item for sublist in [ item.get(bundle) for item in yml if item.get(bundle) ] for item in sublist ]
 
 def main():
-    params, parser = get_arguments()
+    params, ansible = get_arguments()
 
     if not params.filename:
         parser.print_help()
@@ -105,11 +95,10 @@ def main():
         download(Bundle.from_dict(task))
 
     # After getting bundles, run playbook if set to
-    if params.run_playbook is True:
-        if params.dry is True:
-            shell.echo_warning('--run passed and --dry set to true. End.')
-        else:
-            run_playbook(params.filename, params.args)
+    if params.dry is True:
+        shell.echo_warning('--dry was set. End.')
+    else:
+        run_playbook(params.filename, ansible, params.verbose)
 
 ########################################################
 if __name__ == "__main__":

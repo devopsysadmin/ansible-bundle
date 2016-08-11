@@ -6,7 +6,6 @@ from __future__ import print_function
 import os
 import sys
 from subprocess import Popen, PIPE
-from subprocess import call as Call
 import yaml
 import shutil
 import defaults
@@ -58,16 +57,21 @@ def run(command):
     if config.verbose >= defaults.DEBUG:
         echo_debug('IN:\n' + ' '.join(command)+'\n')
     if config.dry is False:
-        process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
-        stdout, stderr = process.communicate()
-        output = stdout + stderr
-        returncode = process.returncode
+        try:
+            process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
+            stdout, stderr = process.communicate()
+            output = stdout + stderr
+            returncode = process.returncode
+        except KeyboardInterrupt:
+            echo_error('User interrupt')
+            sys.exit(1)
+        except:
+            raise
     else:
         output, returncode = ('OK', 0)
     if config.verbose >= defaults.DEBUG:
         echo_debug ('OUT:\n' + output + defaults.DOTS)
     return output, returncode
-
 
 def pwd():
     return os.getcwd()
@@ -87,10 +91,6 @@ def isdir(dirname):
 
 def path(*args):
     return os.path.join(*args)
-
-
-def call(args):
-    return Call(args)
 
 
 def walk(args):
