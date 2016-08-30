@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import sys
 import yaml
+import ConfigParser
 
 from os.path import join, isfile
 from os import getcwd, getenv
@@ -30,10 +31,14 @@ MESSAGES = {
     'debug': ('magenta', 'bold')
 }
 
-def load(filename):
-    if isfile(filename):
-        with open(filename, 'r') as fn:
-            return yaml.load(fn)
+def load_cfg(filename):
+    try:
+        config = ConfigParser.ConfigParser()
+        config.read(filename)
+        return config
+    except:
+        sys.exit('Cannot load %s' %filename)
+
 
 def echo(message, lr=True, typeOf=None):
     if lr:
@@ -89,26 +94,27 @@ class Config:
     dry = False
 
     def __init__(self):
-        yml = self.load()
-        if yml is not '':
-            self.setvalues(yml)
-        else:
-            echo('%s not found or incorrect.' % path, typeOf='error')
-            sys.exit(ERROR)
+        cfg = self.load()
+        if cfg.has_section('bundle'):
+            self.setvalues(cfg)
+
 
     def load(self):
         LOAD_ORDER = (
-            join(WORKDIR, 'bundle.cfg'),
-            join(HOME, '.ansible', 'bundle', 'bundle.cfg')
+            join(WORKDIR, 'ansible.cfg'),
+            join(HOME, '.ansible.cfg'),
+            join('etc', 'ansible', 'ansible.cfg')
         )
-        for filename in LOAD_ORDER:
-            if isfile(filename):
-                return load(filename)
+        if getenv('ANSIBLE_CONFIG') is not None:
+            return load_cfg(os.getenv('ANSIBLE_CONFIG'))
+        else:
+            for filename in LOAD_ORDER:
+                if isfile(filename):
+                    return load_cfg(filename)
 
-    def setvalues(self, yml):
-        for key, value in yml.items():
-            setattr(self, key, value)
+    def setvalues(self, cfg):
+        for key, value in cfg.items('bundle'):
+            setattr(self, key.upper(), value)
         if self.SCM_PREFIX:
             self.SCM_ROLES = self.SCM_PREFIX + self.SCM_ROLES
             self.SCM_MODULES = self.SCM_PREFIX + self.SCM_MODULES
-
