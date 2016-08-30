@@ -41,7 +41,6 @@ def main():
 		version = increase_minor()
 	elif args.patch:
 		version = increase_patch()
-	print version
 	call (['git', 'tag', version])
 	call (['git', 'push', '--tags'])
 	call (['python', 'setup.py', 'sdist', 'upload', '-r', 'pypi'])
