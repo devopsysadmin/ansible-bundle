@@ -4,7 +4,7 @@ import argparse
 
 def get_arguments():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--patch', action='store_true', default=False)
+	parser.add_argument('--patch', action='store_true', default=True)
 	parser.add_argument('--major', action='store_true', default=False)
 	parser.add_argument('--minor', action='store_true', default=False)
 	return parser.parse_args()
@@ -39,7 +39,7 @@ def main():
 		version = increase_major()
 	elif args.minor:
 		version = increase_minor()
-	else:
+	elif args.patch:
 		version = increase_patch()
 	print version
 	call (['git', 'tag', version])
