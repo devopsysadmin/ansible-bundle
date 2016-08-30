@@ -7,7 +7,7 @@ import shell
 import defaults
 from bundle import Bundle, PATH
 import shlex
-import sys
+import sys, os
 from subprocess import call
 
 DEFAULT_VERBOSITY=defaults.QUIET

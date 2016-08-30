@@ -24,6 +24,7 @@ class Git:
         cmd = ['git', 'clone', '--branch', self.branch,
                '--depth', '1', self.url, self.path]
         stdout, rc = shell.run(cmd)
+        shell.cd(shell.WORKDIR)
         if rc == shell.OK:
             return True
         else:
@@ -40,7 +41,7 @@ class Git:
                 stdout, rc = shell.run(cmd)
                 if rc == shell.ERROR:
                     return False
-            shell.cd(shell.WORKDIR)
         elif shell.config.verbose > defaults.QUIET:
             shell.echo_info('Current branch is really a tag. Skip.\n')
+        shell.cd(shell.WORKDIR)
         return True
