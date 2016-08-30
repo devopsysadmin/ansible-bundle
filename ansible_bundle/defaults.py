@@ -20,6 +20,7 @@ DOTS = '\n-------------------'
 
 HOME = getenv('HOME')
 WORKDIR = getcwd()
+DEFAULT_SCM_URL = 'https://github.com'
 
 # Color + decoration for messages printed on terminal
 MESSAGES = {
@@ -87,7 +88,7 @@ class Color:
 class Config:
     SCM = 'git'
     SCM_VERSION = 'master'
-    SCM_PREFIX = ''
+    SCM_PREFIX = DEFAULT_SCM_URL
     SCM_ROLES = ''
     SCM_MODULES = ''
     verbose = QUIET
