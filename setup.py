@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-from subprocess import Popen, PIPE
+from ansible_bundle import __version__
 import sys
 
 setup(name='ansible-bundle',
-      version='0.3.1',
+      version=__version__,
       description="Manage ansible role and modules versioned dependencies.",
       long_description=open('README.md').read(),
       keywords='ansible roles modules',

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 from subprocess import call, Popen, PIPE
+from ansible_bundle import __version__
 import argparse
 
 def get_arguments():
@@ -10,10 +11,7 @@ def get_arguments():
 	return parser.parse_args()
 
 def get_version():
-	p = Popen(['git', 'tag'], stdout=PIPE, stderr=PIPE)
-	stdout, stderr = p.communicate()
-	# Last line is always empty, so take previous
-	return stdout.split('\n')[-2].split('.')
+	return __version__.split('.')
 
 def increase(string):
 	return str(int(string)+1)
@@ -33,6 +31,19 @@ def increase_major():
 	major = increase(major)
 	return '%s.0.0' %major
 
+def new_version(version):
+	filename = 'ansible_bundle/__init__.py'
+	contents = list()
+	newcontents = list()
+	with open(filename, 'r') as fn:
+		contents = fn.read().split('\n')
+		for line in contents:
+			if 'version=' in line:
+				line = '      version=%s,' %version
+			newcontents.append(line)
+	with open(filename, 'w') as fn:
+		fn.write('\n'.join(newcontents))
+
 def main():
 	args = get_arguments()
 	if args.major:
@@ -41,9 +52,17 @@ def main():
 		version = increase_minor()
 	elif args.patch:
 		version = increase_patch()
-	call (['git', 'tag', version])
-	call (['git', 'push', '--tags'])
-	call (['python', 'setup.py', 'sdist', 'upload', '-r', 'pypi'])
+	new_version(version)
+
+	script = (
+		[ 'git', 'commit', '-am', 'New version', version ],
+		[ 'git', 'push'],
+		[ 'git', 'tag', version ],
+		[ 'git', 'push', '--tags' ],
+		[ 'python', 'setup.py', 'sdist', 'upload', '-r', 'pypi' ]
+		)
+	for line in script:
+		call(line)
 
 if __name__=='__main__':
 	main()
