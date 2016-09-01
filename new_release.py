@@ -40,13 +40,12 @@ def new_version(version):
 		contents = fn.read().split('\n')
 	with open(filename, 'w') as fn:
 		for line in contents:
-			print len(line)
-			
-			if '__version__' in line:
-				fn.write('__version__ = \'%s\'' %version)
-			else:
-				fn.write(line)
-			fn.write('\n')
+			if len(line)>0:
+				if '__version__' in line:
+					fn.write('__version__ = \'%s\'' %version)
+				else:
+					fn.write(line)
+				fn.write('\n')
 
 def main():
 	args = get_arguments()
