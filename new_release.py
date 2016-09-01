@@ -41,9 +41,10 @@ def new_version(version):
 	with open(filename, 'w') as fn:
 		for line in contents:
 			if '__version__=' in line:
-				fn.write('__version__=%s\n' %version)
+				fn.write('__version__=%s' %version)
 			else:
 				fn.write(line)
+			fn.write('\n')
 
 def main():
 	args = get_arguments()
