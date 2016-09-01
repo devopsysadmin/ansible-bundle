@@ -26,6 +26,7 @@ def get_arguments():
     parser.add_argument('--bundle-dry', dest='dry', action='store_true', default=DEFAULT_DRY,
                         help='Will give info about the changes to be performed')
     parser.add_argument('-v', '--verbose', action='count')
+    parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
     return parser.parse_known_args()
 
 
@@ -75,13 +76,7 @@ def items(bundle, yml):
 
 def main():
     params, ansible = get_arguments()
-
-    if not params.filename:
-        parser.print_help()
-        print ''
-        shell.echo_error('No file name specified')
-        shell.exit(defaults.ERROR)
-
+    shell.config.initialize()
     shell.config.verbose = params.verbose
     shell.config.dry = params.dry
 

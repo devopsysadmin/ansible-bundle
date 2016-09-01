@@ -95,6 +95,9 @@ class Config:
     dry = False
 
     def __init__(self):
+        pass
+
+    def initialize(self):
         cfg = self.load()
         if cfg.has_section('bundle'):
             self.setvalues(cfg)

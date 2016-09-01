@@ -5,6 +5,7 @@
 from __future__ import print_function
 import os
 import sys
+from ansible_bundle import __version__
 from subprocess import Popen, PIPE
 import yaml
 import shutil
@@ -15,7 +16,8 @@ OK = defaults.OK
 ERROR = defaults.ERROR
 HOME = defaults.HOME
 WORKDIR = defaults.WORKDIR
-
+prog = os.path.basename(sys.argv[0])
+version = __version__
 config = defaults.Config()
 
 def load(filename):
