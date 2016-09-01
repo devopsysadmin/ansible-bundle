@@ -2,6 +2,7 @@
 from subprocess import call, Popen, PIPE
 from ansible_bundle import __version__
 import argparse
+import os
 
 def get_arguments():
 	parser = argparse.ArgumentParser()
@@ -32,17 +33,17 @@ def increase_major():
 	return '%s.0.0' %major
 
 def new_version(version):
-	filename = 'ansible_bundle/__init__.py'
+	filename = os.path.join('ansible_bundle', '__init__.py')
 	contents = list()
 	newcontents = list()
 	with open(filename, 'r') as fn:
 		contents = fn.read().split('\n')
+	with open(filename, 'w') as fn:
 		for line in contents:
 			if 'version=' in line:
-				line = '      version=%s,' %version
-			newcontents.append(line)
-	with open(filename, 'w') as fn:
-		fn.write('\n'.join(newcontents))
+				fn.write('      version=%s,\n' %version)
+			else:
+				fn.write(line + '\n')
 
 def main():
 	args = get_arguments()
@@ -55,7 +56,7 @@ def main():
 	new_version(version)
 
 	script = (
-		[ 'git', 'commit', '-am', 'New version', version ],
+		[ 'git', 'commit', '-am', 'New version %s' %version ],
 		[ 'git', 'push'],
 		[ 'git', 'tag', version ],
 		[ 'git', 'push', '--tags' ],
