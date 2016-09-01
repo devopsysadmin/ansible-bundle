@@ -4,12 +4,8 @@ from setuptools import setup, find_packages
 from subprocess import Popen, PIPE
 import sys
 
-p = Popen(['git', 'tag'], stdout=PIPE, stderr=PIPE)
-stdout, stderr = p.communicate()
-version = stdout.split('\n')[-2] # Last line is always empty, so take previous
-
 setup(name='ansible-bundle',
-      version=version,
+      version='0.3.1',
       description="Manage ansible role and modules versioned dependencies.",
       long_description=open('README.md').read(),
       keywords='ansible roles modules',
