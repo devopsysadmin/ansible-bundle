@@ -12,12 +12,12 @@ repositories before launching a playbook.
 
 # Prerequisites
 
-- Ansible >= 2.0
+- Ansible. Any version.
 
 # Execution
 
-The most basic usage is running `ansible-bundle` with no parameters. This will 
-download bundles found on `site.yml` and its include files.
+The most basic usage is running `ansible-bundle FILENAME`. This will 
+download bundles found on `FILENAME` and its include files.
 
 # Parameters
 
@@ -28,10 +28,12 @@ download bundles found on `site.yml` and its include files.
 - `--bundle-dry` Shows what will be run (as it won't download anything, 
 also won't search for dependencies)
 
+- `--bundle-deps-only` Don't run the playbook, just satisfies dependencies.
+
 # Configuration
 
-By now, ansible-bundle expects to find a `bundle.cfg` file within the current 
-path, with this configuration:
+By now, ansible-bundle expects to find a `[bundle]` section into ansible.cfg 
+file with this configuration:
 
 - `SCM_PREFIX` (mandatory): URL where the roles (or libraries) are located. For 
 example, if role `apache` is in `github.com/foo/roles/apache`, the `SCM_PREFIX` 
@@ -85,8 +87,7 @@ Given the following playbook (site.yml):
 		    - { role: apache, version: '2.4' }
 
 Running `ansible-bundle` will search roles into the `site-common.yml` file and 
-download them. Also, will download role postgresql (branch/tag 1.0) and apache
-(master).
+download them. Also, will download role postgresql 1.0 and apache master.
 
 In further releases, the way to say the version to be downloaded will change in
 order to be more like ansible-galaxy.

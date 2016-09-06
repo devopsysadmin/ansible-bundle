@@ -25,6 +25,8 @@ def get_arguments():
                         help='clean roles and libraries directories')
     parser.add_argument('--bundle-dry', dest='dry', action='store_true', default=DEFAULT_DRY,
                         help='Will give info about the changes to be performed')
+    parser.add_argument('--bundle-deps-only', dest='dont_play', action='store_true', default=False,
+                        help='Don\'t run the playbook after getting dependencies')
     parser.add_argument('-v', '--verbose', action='count')
     parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
     return parser.parse_known_args()
@@ -92,6 +94,8 @@ def main():
     # After getting bundles, run playbook if set to
     if params.dry is True:
         shell.echo_warning('--dry was set. End.')
+    elif params.dont_play is True:
+        shell.echo_warning('--bundle-deps-only was set. Exit.')
     else:
         run_playbook(params.filename, ansible, params.verbose)
 
