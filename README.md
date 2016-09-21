@@ -14,12 +14,14 @@ repositories before launching a playbook.
 
 - Ansible. Any version.
 
-# Execution
+# Syntax
 
 The most basic usage is running `ansible-bundle FILENAME`. This will 
 download bundles found on `FILENAME` and its include files.
 
 # Parameters
+
+All parameters must be AFTER the playbook to be run.
 
 - `--bundle-clean-roles` Will clean roles and library directories before download
 
