@@ -23,7 +23,7 @@ download bundles found on `FILENAME` and its include files.
 
 All parameters must be AFTER the playbook to be run.
 
-ansible-bundle, among the ansible-playbook parameters, accepts those:
+ansible-bundle, along the ansible-playbook parameters, accepts those:
 
 - `--bundle-clean-roles` Will clean roles and library directories before download
 
