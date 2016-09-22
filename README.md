@@ -19,9 +19,11 @@ repositories before launching a playbook.
 The most basic usage is running `ansible-bundle FILENAME`. This will 
 download bundles found on `FILENAME` and its include files.
 
-# Parameters
+# Optional Parameters
 
 All parameters must be AFTER the playbook to be run.
+
+ansible-bundle, among the ansible-playbook parameters, accepts those:
 
 - `--bundle-clean-roles` Will clean roles and library directories before download
 
@@ -34,7 +36,7 @@ also won't search for dependencies)
 
 # Configuration
 
-By now, ansible-bundle expects to find a `[bundle]` section into ansible.cfg 
+ansible-bundle expects to find a `[bundle]` section into ansible.cfg 
 file with this configuration:
 
 - `SCM_PREFIX` (mandatory): URL where the roles (or libraries) are located. For 
@@ -57,7 +59,7 @@ Following the previous example, `SCM_PREFIX` should be github.com/foo,
 This program will download from a GIT repository a branch (or tag). If no 
 branch is set, will try to download master. But, in order to have an 
 unversioned bundle living peacefully with a versioned bundle, those unversioned 
-must be downloaded within their own directory. So, if you have (or need) 
+will be downloaded within their own directory. So, if you have (or need) 
 unversioned bundles, add or modify this line to `ansible.cfg`, into `defaults` 
 section:
 
@@ -75,7 +77,7 @@ section:
         roles_path    = ./roles/unversioned:./roles
         ...
 
-# Example
+# Example of use
 
 Given the following playbook (site.yml):
 
@@ -88,11 +90,8 @@ Given the following playbook (site.yml):
 		    - postgresql/1.0
 		    - { role: apache, version: '2.4' }
 
-Running `ansible-bundle` will search roles into the `site-common.yml` file and 
+Running `ansible-bundle site.yml` will search roles into the `site-common.yml` file and 
 download them. Also, will download role postgresql 1.0 and apache master.
-
-In further releases, the way to say the version to be downloaded will change in
-order to be more like ansible-galaxy.
 
 # Author
 
