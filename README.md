@@ -13,26 +13,34 @@ repositories before launching a playbook.
 # Prerequisites
 
 - Ansible. Any version.
+- Git > 1.6 (possibly will work on earlier releases, but hasn't been tested)
+- Python > 2.6
+
+# Installation
+
+## The easy way: pip
+
+`sudo pip install ansible-bundle`
+
+## The not-that-easy way: from code
+
+- 
+- Run `sudo python setup.py`
+
 
 # Syntax
 
-The most basic usage is running `ansible-bundle FILENAME`. This will 
-download bundles found on `FILENAME` and its include files.
+`ansible-bundle FILEYAML [ansible-playbook-options] [ansible-bundle-options]`
 
-# Optional Parameters
-
-All parameters must be AFTER the playbook to be run.
-
-ansible-bundle, along the ansible-playbook parameters, accepts these:
+ansible-bundle, along the ansible-playbook parameters, has also these:
 
 - `--bundle-clean-roles` Will clean roles and library directories before download
-
-- `-v` Sets verbose mode. Can be repeated to increase verbosity level.
 
 - `--bundle-dry` Shows what will be run (as it won't download anything, 
 also won't search for dependencies)
 
 - `--bundle-deps-only` Don't run the playbook, just satisfies dependencies.
+
 
 # Configuration
 
