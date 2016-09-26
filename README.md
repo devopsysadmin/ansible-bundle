@@ -14,7 +14,7 @@ repositories before launching a playbook.
 
 - Ansible. Any version.
 - Git > 1.6 (possibly will work on earlier releases, but hasn't been tested)
-- Python > 2.6
+- Python 2 > 2.6
 
 # Installation
 
@@ -24,7 +24,7 @@ repositories before launching a playbook.
 
 ## The not-that-easy way: from code
 
-- Download [latest release](/archive/master.zip)
+- Download [latest release](../../archive/master.zip)
 - Run `sudo python setup.py`
 
 
