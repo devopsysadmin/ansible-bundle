@@ -24,7 +24,7 @@ repositories before launching a playbook.
 
 ## The not-that-easy way: from code
 
-- Download [latest release](archive/master.zip)
+- Download [latest release](/archive/master.zip)
 - Run `sudo python setup.py`
 
 
