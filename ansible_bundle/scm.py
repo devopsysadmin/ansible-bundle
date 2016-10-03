@@ -1,9 +1,6 @@
-#!/usr/bin/env python2
 # -*- encoding: utf8 -*-
 
-import defaults
-import shell
-
+from ansible_bundle import shell, defaults
 
 class Git:
     url = None
@@ -42,6 +39,6 @@ class Git:
                 if rc == shell.ERROR:
                     return False
         elif shell.config.verbose > defaults.QUIET:
-            shell.echo_info('Current branch is really a tag. Skip.\n')
+            shell.echo_info('Current branch mismatches bundle version. Assuming tag and skip.\n')
         shell.cd(shell.WORKDIR)
         return True

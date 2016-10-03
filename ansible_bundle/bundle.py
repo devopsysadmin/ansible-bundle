@@ -1,10 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- encoding: utf8 -*-
 #
 
-import defaults
-import shell
-from scm import Git
+from ansible_bundle import defaults, shell
+from ansible_bundle.scm import Git
 
 WORKDIR = shell.WORKDIR
 CONFIG = shell.config
@@ -22,27 +21,20 @@ class Role(object):
     url = None
 
     def __init__(self, raw):
-        self.name, self.version = self.generate_name_version(raw)
-        self.path = self.generate_path(self.name, self.version)
-        self.url = self.generate_url(self.name)
-
-    def generate_name_version(self, raw):
         if isinstance(raw, dict):
             split = raw.get('role', 'unnamed').split('/')
         else:
             split = raw.split('/')
-        name = split[0]
-        version = split[1] if len(split) > 1 else CONFIG.SCM_VERSION
-        return name, version
 
-    def generate_url(self, name):
-        return '%s/%s' % (CONFIG.SCM_ROLES, name)
-
-    def generate_path(self, name, version):
-        if version == CONFIG.SCM_VERSION:
-            return shell.path(WORKDIR, PATH['role'], 'unversioned', name)
+        self.name = split[0]
+        if len(split) > 1:
+            self.version = split[1]
+            self.path = shell.path(WORKDIR, PATH['role'], self.name, self.version)
         else:
-            return shell.path(WORKDIR, PATH['role'], name, version)
+            self.version = CONFIG.SCM_VERSION
+            self.path = shell.path(WORKDIR, PATH['role'], 'unversioned', self.name)
+
+        self.url = '%s/%s' % (CONFIG.SCM_ROLES, self.name)
 
 
 class Bundle(object):

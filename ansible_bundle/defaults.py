@@ -1,8 +1,7 @@
 from __future__ import print_function
-
+from configparser import ConfigParser
 import sys
 import yaml
-import ConfigParser
 
 from os.path import join, isfile
 from os import getcwd, getenv
@@ -34,7 +33,7 @@ MESSAGES = {
 
 def load_cfg(filename):
     try:
-        config = ConfigParser.ConfigParser()
+        config = ConfigParser()
         config.read(filename)
         return config
     except:

@@ -1,15 +1,12 @@
-#!/usr/bin/env python2
 # -*- encoding: utf8 -*-
-#
 
 from __future__ import print_function
 import os
 import sys
-from ansible_bundle import __version__
-from subprocess import Popen, PIPE
 import yaml
 import shutil
-import defaults
+from ansible_bundle import __version__, defaults
+from subprocess import Popen, PIPE
 
 Color = defaults.Color
 OK = defaults.OK
@@ -72,7 +69,7 @@ def run(command):
     else:
         output, returncode = ('OK', 0)
     if config.verbose >= defaults.DEBUG:
-        echo_debug ('OUT:\n' + output + defaults.DOTS)
+        echo_debug ('OUT:\n' + output.decode('utf-8') + defaults.DOTS)
     return output, returncode
 
 def pwd():
@@ -119,6 +116,3 @@ def rmdir(dirname):
             return False
     else:
         return True
-
-
-###############################

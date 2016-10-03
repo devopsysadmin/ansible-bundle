@@ -1,13 +1,11 @@
-#!/usr/bin/env python2
 # -*- encoding: utf8 -*-
 #
 
 import argparse
-import shell
-import defaults
-from bundle import Bundle, PATH
 import shlex
 import sys, os
+from ansible_bundle import shell, defaults
+from ansible_bundle.bundle import Bundle, PATH
 from subprocess import call
 
 DEFAULT_VERBOSITY=defaults.QUIET
@@ -27,7 +25,7 @@ def get_arguments():
                         help='Will give info about the changes to be performed')
     parser.add_argument('--bundle-deps-only', dest='dont_play', action='store_true', default=False,
                         help='Don\'t run the playbook after getting dependencies')
-    parser.add_argument('-v', '--verbose', action='count')
+    parser.add_argument('-v', '--verbose', action='count', default=DEFAULT_VERBOSITY)
     parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
     return parser.parse_known_args()
 

@@ -23,11 +23,12 @@ setup(name='ansible-bundle',
       zip_safe=False,
       install_requires=[line for line in open('requirements.txt')],
       classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'Environment :: Console',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
-          'Operating System :: OS Independent',
+          'Operating System :: POSIX',
+          'Programming Language :: Python :: 2',
           'Topic :: Utilities'
       ]
 )
