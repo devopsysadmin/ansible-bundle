@@ -62,7 +62,7 @@ def run_playbook(filename, ansible_params, verbosity=0):
     cmd = [ 'ansible-playbook', filename ] + ansible_params
     if verbosity > 0 : cmd += [ '-'+('v'*verbosity) ]
     try:
-        call(cmd)
+        sys.exit(call(cmd))
     except:
         pass
 
