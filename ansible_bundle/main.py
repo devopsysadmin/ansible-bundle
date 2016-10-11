@@ -27,6 +27,8 @@ def get_arguments():
                         help='Don\'t run the playbook after getting dependencies')
     parser.add_argument('-v', '--verbose', action='count', default=DEFAULT_VERBOSITY)
     parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
+    parser.add_argument('--bundle-disable-color', dest='use_colors', action='store_false', default=True,
+                        help='Don\'t colorize console output')
     return parser.parse_known_args()
 
 
@@ -79,6 +81,7 @@ def main():
     shell.config.initialize()
     shell.config.verbose = params.verbose
     shell.config.dry = params.dry
+    shell.config.colorize = params.use_colors
 
     if params.clean is True:
         clean_dirs(['roles'])

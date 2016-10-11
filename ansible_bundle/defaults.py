@@ -92,6 +92,7 @@ class Config:
     SCM_MODULES = ''
     verbose = QUIET
     dry = False
+    colorize = True
 
     def __init__(self):
         pass

@@ -28,7 +28,7 @@ def echo(message, lr=True, typeOf=None, stderr=False):
         end = '\n'
     else:
         end = ''
-    if typeOf:
+    if config.colorize and typeOf:
         color, decoration = defaults.MESSAGES[typeOf]
         msg = Color.text(message, color=color, decoration=decoration)
     else:
