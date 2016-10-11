@@ -3,10 +3,8 @@
 
 import argparse
 import shlex
-import sys, os
 from ansible_bundle import shell, defaults
 from ansible_bundle.bundle import Bundle, PATH
-from subprocess import call
 
 DEFAULT_VERBOSITY=defaults.QUIET
 DEFAULT_DRY=defaults.DRY
@@ -62,9 +60,9 @@ def run_playbook(filename, ansible_params, verbosity=0):
     cmd = [ 'ansible-playbook', filename ] + ansible_params
     if verbosity > 0 : cmd += [ '-'+('v'*verbosity) ]
     try:
-        sys.exit(call(cmd))
+        shell.exit(shell.call(cmd))
     except:
-        pass
+        shell.exit(1)
 
 def download(bundle):
     if bundle.properties not in downloaded:

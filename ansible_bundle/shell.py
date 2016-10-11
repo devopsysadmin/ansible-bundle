@@ -6,7 +6,7 @@ import sys
 import yaml
 import shutil
 from ansible_bundle import __version__, defaults
-from subprocess import Popen, PIPE
+import subprocess
 
 Color = defaults.Color
 OK = defaults.OK
@@ -52,15 +52,20 @@ def echo_info(message, lr=False):
 def echo_warning(message):
     echo('[WARN] %s' %message, typeOf='warning')
 
+
+def call(command):
+    return subprocess.call(command)
+
 def run(command):
     if config.verbose >= defaults.DEBUG:
         echo_debug('IN:\n' + ' '.join(command)+'\n')
     if config.dry is False:
         try:
-            process = Popen(command, shell=False, stdout=PIPE, stderr=PIPE)
+            process = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             output = stdout + stderr
             returncode = process.returncode
+            return returncode, output
         except KeyboardInterrupt:
             echo_error('User interrupt')
             sys.exit(1)
