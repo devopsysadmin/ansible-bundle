@@ -20,7 +20,7 @@ class Git:
     def get(self):
         cmd = ['git', 'clone', '--branch', self.branch,
                '--depth', '1', self.url, self.path]
-        stdout, rc = shell.run(cmd)
+        rc, stdout = shell.run(cmd)
         shell.cd(shell.WORKDIR)
         if rc == shell.OK:
             return True
@@ -35,7 +35,7 @@ class Git:
                 ['git', 'pull', '--rebase', 'origin', self.branch],
                 )
             for cmd in cmds:
-                stdout, rc = shell.run(cmd)
+                rc, stdout = shell.run(cmd)
                 if rc == shell.ERROR:
                     return False
         elif shell.config.verbose > defaults.QUIET:

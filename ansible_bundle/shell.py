@@ -56,7 +56,7 @@ def echo_warning(message):
 def call(command):
     return subprocess.call(command)
 
-def run(command):
+def run(command, output=False):
     if config.verbose >= defaults.DEBUG:
         echo_debug('IN:\n' + ' '.join(command)+'\n')
     if config.dry is False:
@@ -75,7 +75,7 @@ def run(command):
         output, returncode = ('OK', 0)
     if config.verbose >= defaults.DEBUG:
         echo_debug ('OUT:\n' + output.decode('utf-8') + defaults.DOTS)
-    return output, returncode
+    return returncode, output
 
 def pwd():
     return os.getcwd()

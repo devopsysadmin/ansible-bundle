@@ -59,10 +59,13 @@ def load_site(filename):
 def run_playbook(filename, ansible_params, verbosity=0):
     cmd = [ 'ansible-playbook', filename ] + ansible_params
     if verbosity > 0 : cmd += [ '-'+('v'*verbosity) ]
+
     try:
-        shell.exit(shell.call(cmd))
-    except:
-        shell.exit(1)
+        rc = shell.call(cmd)
+    except KeyboardInterrupt:
+        rc = 1
+    shell.exit(rc)
+
 
 def download(bundle):
     if bundle.properties not in downloaded:
