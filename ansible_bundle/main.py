@@ -3,7 +3,7 @@
 
 import argparse
 import shlex
-from ansible_bundle import shell, defaults
+from ansible_bundle import shell, defaults, worker
 from ansible_bundle.bundle import Bundle, PATH
 
 DEFAULT_VERBOSITY=defaults.QUIET
@@ -91,9 +91,12 @@ def main():
 
     yml = load_site(args.filename)
     tasks = items('roles', yml) + items('libraries', yml)
+    pool = worker.ThreadPool(args.workers)
 
-    for task in tasks:
+    for idx, task in enumerate(tasks):
+        pool.add_task(download, Bundle.from_dict(task))
         download(Bundle.from_dict(task))
+        if idx % args.workers == 0: pool.wait_completion()
 
     # After getting bundles, run playbook if set to
     if args.dry is True:
