@@ -22,6 +22,21 @@ WORKDIR = getcwd()
 DEFAULT_SCM_URL = 'https://github.com'
 
 # Color + decoration for messages printed on terminal
+
+
+COLORS = {
+    'red': '\033[91m',
+    'green': '\033[92m',
+    'yellow': '\033[93m',
+    'blue': '\033[94m',
+    'magenta' : '\033[95m',
+}
+
+DECORATIONS = {
+    'bold': '\033[1m',
+    'underline': '\033[4m',
+}
+
 MESSAGES = {
     'none': (None, None),
     'ok': ('green', 'bold'),
@@ -30,6 +45,8 @@ MESSAGES = {
     'error': ('red', 'bold'),
     'debug': ('magenta', 'bold')
 }
+
+END = '\033[0m'
 
 def load_cfg(filename):
     try:
@@ -53,35 +70,18 @@ def echo(message, lr=True, typeOf=None):
     print(msg, end=end)
     sys.stdout.flush()
 
-class Color:
-    COLORS = {
-        'red': '\033[91m',
-        'green': '\033[92m',
-        'yellow': '\033[93m',
-        'blue': '\033[94m',
-        'magenta' : '\033[95m',
-    }
-
-    DECORATIONS = {
-        'bold': '\033[1m',
-        'underline': '\033[4m',
-    }
-
-    END = '\033[0m'
-
-    @classmethod
-    def text(cls, s, **kwargs):
-        msg = ''
-        color = kwargs.get('color', None)
-        decoration = kwargs.get('decoration', None)
-        if decoration is not None:
-            msg += cls.DECORATIONS[decoration]
-        if color is not None:
-            msg += cls.COLORS[color]
-        msg += s
-        if color or decoration:
-            msg += cls.END
-        return (msg)
+def text(s, **kwargs):
+    msg = ''
+    color = kwargs.get('color', None)
+    decoration = kwargs.get('decoration', None)
+    if decoration is not None:
+        msg += DECORATIONS[decoration]
+    if color is not None:
+        msg += COLORS[color]
+    msg += s
+    if color or decoration:
+        msg += END
+    return (msg)
 
 
 class Config:

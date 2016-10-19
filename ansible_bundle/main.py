@@ -29,7 +29,7 @@ def get_arguments():
     parser.add_argument('--bundle-disable-color', dest='use_colors', action='store_false', default=True,
                         help='Don\'t colorize console output')
     parser.add_argument('--bundle-workers', dest='workers', type=int, default=1,
-                        help='Concurrent downloads when getting roles')
+                        help='Concurrent downloads when getting roles. Default: 1')
     return parser.parse_known_args()
 
 
@@ -69,13 +69,14 @@ def run_playbook(filename, ansible_params, verbosity=0):
         rc = 1
     shell.exit(rc)
 
-
-def download(bundle):
+def download(pool, bundle):
     if bundle.properties not in downloaded:
         downloaded.append(bundle.properties)
-        bundle.download()
-        for dep in bundle.dependencies():
-            download(dep)
+        action = 'Updating' if bundle.exists else 'Getting'
+        shell.echo_info('%s %s (%s)...' %(action, bundle.name, bundle.version), lr=True)
+        pool.add_task(bundle.download)
+    for dep in bundle.dependencies():
+        download(pool, dep)
 
 def items(bundle, yml):
     return [ item for sublist in [ item.get(bundle) for item in yml if item.get(bundle) ] for item in sublist ]
@@ -93,9 +94,11 @@ def main():
 
     yml = load_site(args.filename)
     tasks = items('roles', yml) + items('libraries', yml)
-
+    
+    pool = worker.ThreadPool(args.workers)
     for task in tasks:
-        download(Bundle.from_dict(task))
+        download(pool, Bundle.from_dict(task))
+    pool.wait_completion()
 
     # After getting bundles, run playbook if set to
     if args.dry is True:
@@ -103,6 +106,7 @@ def main():
     elif args.dont_play is True:
         shell.echo_warning('--bundle-deps-only was set. Exit.')
     else:
+        shell.echo('\nRunning playbook', color='yellow')
         run_playbook(args.filename, ansible, args.verbose)
 
 ########################################################

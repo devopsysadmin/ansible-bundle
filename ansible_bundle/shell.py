@@ -8,7 +8,7 @@ import shutil
 from ansible_bundle import __version__, defaults
 import subprocess
 
-Color = defaults.Color
+Color = defaults.text
 OK = defaults.OK
 ERROR = defaults.ERROR
 HOME = defaults.HOME
@@ -23,14 +23,16 @@ def load(filename):
             return yaml.load(fn)
 
 
-def echo(message, lr=True, typeOf=None, stderr=False):
+def echo(message, lr=True, typeOf=None, stderr=False, color=None):
     if lr:
         end = '\n'
     else:
         end = ''
     if config.colorize and typeOf:
         color, decoration = defaults.MESSAGES[typeOf]
-        msg = Color.text(message, color=color, decoration=decoration)
+        msg = Color(message, color=color, decoration=decoration)
+    elif color is not None:
+        msg = Color(message, color=color)
     else:
         msg = message
     if stderr:
