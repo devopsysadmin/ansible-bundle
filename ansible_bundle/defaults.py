@@ -100,7 +100,7 @@ class Config:
 
     def initialize(self):
         cfg = self.load()
-        if cfg.has_section('bundle'):
+        if cfg and cfg.has_section('bundle'):
             self.setvalues(cfg)
 
 
@@ -116,6 +116,7 @@ class Config:
             for filename in LOAD_ORDER:
                 if isfile(filename):
                     return load_cfg(filename)
+        return None
 
     def setvalues(self, cfg):
         for key, value in cfg.items('bundle'):
