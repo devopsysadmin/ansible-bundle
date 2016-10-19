@@ -28,8 +28,8 @@ def get_arguments():
     parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
     parser.add_argument('--bundle-disable-color', dest='use_colors', action='store_false', default=True,
                         help='Don\'t colorize console output')
-    parser.add_argument('--bundle-workers', dest='workers', type=int, default=1,
-                        help='Concurrent downloads when getting roles. Default: 1')
+    parser.add_argument('--bundle-workers', dest='workers', type=int, default=0,
+                        help='Concurrent downloads when getting roles. Default: %s' %defaults.Config.workers)
     return parser.parse_known_args()
 
 
@@ -87,7 +87,7 @@ def main():
     shell.config.verbose = args.verbose
     shell.config.dry = args.dry
     shell.config.colorize = args.use_colors
-    shell.config.workers = args.workers
+    if args.workers > 0: shell.config.workers = args.workers
 
     if args.clean is True:
         clean_dirs(['roles'])
@@ -95,7 +95,7 @@ def main():
     yml = load_site(args.filename)
     tasks = items('roles', yml) + items('libraries', yml)
     
-    pool = worker.ThreadPool(args.workers)
+    pool = worker.ThreadPool(shell.config.workers)
     for task in tasks:
         download(pool, Bundle.from_dict(task))
     pool.wait_completion()

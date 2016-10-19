@@ -34,7 +34,7 @@ class Role(object):
             self.version = CONFIG.SCM_VERSION
             self.path = shell.path(WORKDIR, PATH['role'], 'unversioned', self.name)
 
-        self.url = '%s/%s' % (CONFIG.SCM_ROLES, self.name)
+        self.url = '%s/%s' % (CONFIG.scm_roles, self.name)
 
 
 class Bundle(object):

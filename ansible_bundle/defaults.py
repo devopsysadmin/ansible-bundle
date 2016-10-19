@@ -87,9 +87,9 @@ def text(s, **kwargs):
 class Config:
     SCM = 'git'
     SCM_VERSION = 'master'
-    SCM_PREFIX = DEFAULT_SCM_URL
-    SCM_ROLES = ''
-    SCM_MODULES = ''
+    scm_prefix = DEFAULT_SCM_URL
+    scm_roles = ''
+    scm_modules = ''
     verbose = QUIET
     dry = False
     colorize = True
@@ -120,7 +120,9 @@ class Config:
 
     def setvalues(self, cfg):
         for key, value in cfg.items('bundle'):
-            setattr(self, key.upper(), value)
-        if self.SCM_PREFIX:
-            self.SCM_ROLES = self.SCM_PREFIX + self.SCM_ROLES
-            self.SCM_MODULES = self.SCM_PREFIX + self.SCM_MODULES
+            setattr(self, key, value)
+
+        self.workers = int(self.workers)
+        if self.scm_prefix:
+            self.scm_roles = self.scm_prefix + self.scm_roles
+            self.scm_modules = self.scm_prefix + self.scm_modules
