@@ -93,6 +93,7 @@ class Config:
     verbose = QUIET
     dry = False
     colorize = True
+    workers = 1
 
     def __init__(self):
         pass

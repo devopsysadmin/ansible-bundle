@@ -87,7 +87,12 @@ class Bundle(object):
     def __update_properties(self):
         self.properties = (self.name, self.version)
 
+    def message(self, string, typeOf, lr=True):
+        if shell.config.workers == 1 and shell.config.verbose < defaults.DEBUG:
+            shell.echo (string, typeOf=typeOf, lr=lr)
+
     def download(self):
+        lr = True if shell.config.workers > 1 else False
         git = Git(self.url, self.path, self.version)
         if shell.isdir(self.path):
             msg = 'Updating'
@@ -95,15 +100,10 @@ class Bundle(object):
         else:
             msg = 'Getting'
             func = git.get
-        if shell.config.verbose < defaults.DEBUG:
-            shell.echo_info ('%s %s (%s)...' %
-                                (msg, self.name, self.version),
-                            lr=False
-                            )
+        self.message('%s %s (%s)...' % (msg, self.name, self.version), typeOf='info', lr=lr)
         ok = func()
-        if shell.config.verbose < defaults.DEBUG:
-            if ok:
-                shell.echo('OK', typeOf='ok')
-            else:
-                shell.echo('ERROR', typeOf='error')
+        if ok:
+            self.message('OK', typeOf='ok', lr=True)
+        else:
+            self.message('ERROR', typeOf='error', lr=True)
         return ok

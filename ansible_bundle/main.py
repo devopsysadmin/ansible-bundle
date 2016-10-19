@@ -5,6 +5,7 @@ import argparse
 import shlex
 from ansible_bundle import shell, defaults, worker
 from ansible_bundle.bundle import Bundle, PATH
+import time
 
 DEFAULT_VERBOSITY=defaults.QUIET
 DEFAULT_DRY=defaults.DRY
@@ -27,7 +28,7 @@ def get_arguments():
     parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
     parser.add_argument('--bundle-disable-color', dest='use_colors', action='store_false', default=True,
                         help='Don\'t colorize console output')
-    parser.add_argument('--bundle-workers', dest='jobs', type=int, default=1,
+    parser.add_argument('--bundle-workers', dest='workers', type=int, default=1,
                         help='Concurrent downloads when getting roles')
     return parser.parse_known_args()
 
@@ -71,8 +72,8 @@ def run_playbook(filename, ansible_params, verbosity=0):
 
 def download(bundle):
     if bundle.properties not in downloaded:
-        bundle.download()
         downloaded.append(bundle.properties)
+        bundle.download()
         for dep in bundle.dependencies():
             download(dep)
 
@@ -85,18 +86,16 @@ def main():
     shell.config.verbose = args.verbose
     shell.config.dry = args.dry
     shell.config.colorize = args.use_colors
+    shell.config.workers = args.workers
 
     if args.clean is True:
         clean_dirs(['roles'])
 
     yml = load_site(args.filename)
     tasks = items('roles', yml) + items('libraries', yml)
-    pool = worker.ThreadPool(args.workers)
 
-    for idx, task in enumerate(tasks):
-        pool.add_task(download, Bundle.from_dict(task))
+    for task in tasks:
         download(Bundle.from_dict(task))
-        if idx % args.workers == 0: pool.wait_completion()
 
     # After getting bundles, run playbook if set to
     if args.dry is True:
