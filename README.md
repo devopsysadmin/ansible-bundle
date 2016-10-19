@@ -41,6 +41,10 @@ also won't search for dependencies)
 
 - `--bundle-deps-only` Don't run the playbook, just satisfies dependencies.
 
+- `--bundle-disable-color` Useful for non-interactive consoles
+
+- `--bundle-workers` concurrent connections when downloading/updating roles. Default: 1
+
 
 # Configuration
 
