@@ -27,6 +27,8 @@ def get_arguments():
     parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
     parser.add_argument('--bundle-disable-color', dest='use_colors', action='store_false', default=True,
                         help='Don\'t colorize console output')
+    parser.add_argument('--bundle-workers', dest='jobs', type=int, default=1,
+                        help='Concurrent downloads when getting roles')
     return parser.parse_known_args()
 
 
@@ -78,28 +80,28 @@ def items(bundle, yml):
     return [ item for sublist in [ item.get(bundle) for item in yml if item.get(bundle) ] for item in sublist ]
 
 def main():
-    params, ansible = get_arguments()
+    args, ansible = get_arguments()
     shell.config.initialize()
-    shell.config.verbose = params.verbose
-    shell.config.dry = params.dry
-    shell.config.colorize = params.use_colors
+    shell.config.verbose = args.verbose
+    shell.config.dry = args.dry
+    shell.config.colorize = args.use_colors
 
-    if params.clean is True:
+    if args.clean is True:
         clean_dirs(['roles'])
 
-    yml = load_site(params.filename)
+    yml = load_site(args.filename)
     tasks = items('roles', yml) + items('libraries', yml)
 
     for task in tasks:
         download(Bundle.from_dict(task))
 
     # After getting bundles, run playbook if set to
-    if params.dry is True:
+    if args.dry is True:
         shell.echo_warning('--dry was set. End.')
-    elif params.dont_play is True:
+    elif args.dont_play is True:
         shell.echo_warning('--bundle-deps-only was set. Exit.')
     else:
-        run_playbook(params.filename, ansible, params.verbose)
+        run_playbook(args.filename, ansible, args.verbose)
 
 ########################################################
 if __name__ == "__main__":
