@@ -48,8 +48,9 @@ def echo_debug(message):
 def echo_error(message):
     echo('[ERROR] %s' %message, typeOf='error', stderr=True)
 
-def echo_info(message, lr=False):
-    echo('[INFO] %s' %message, typeOf='info', lr=lr)
+def echo_info(message):
+    if config.verbosity > defaults.QUIET:
+        echo('[INFO] %s\n' %message, typeOf='info', lr=False)
 
 def echo_warning(message):
     echo('[WARN] %s' %message, typeOf='warning')
@@ -59,7 +60,7 @@ def call(command):
     return subprocess.call(command)
 
 def run(command, output=False):
-    if config.verbose >= defaults.DEBUG:
+    if config.verbosity >= defaults.DEBUG:
         echo_debug('IN:\n' + ' '.join(command)+'\n')
     if config.dry is False:
         try:
@@ -75,7 +76,7 @@ def run(command, output=False):
             raise
     else:
         output, returncode = ('OK', 0)
-    if config.verbose >= defaults.DEBUG:
+    if config.verbosity >= defaults.DEBUG:
         echo_debug ('OUT:\n' + output.decode('utf-8') + defaults.DOTS)
     return returncode, output
 
@@ -110,7 +111,7 @@ def cd(dirname):
     except:
         retval=False
 
-    if retval and config.verbose >= defaults.DEBUG:
+    if retval and config.verbosity >= defaults.DEBUG:
         echo_debug('Current dir is ' + dirname + defaults.DOTS)
     return retval
 

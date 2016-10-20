@@ -1,5 +1,6 @@
 from __future__ import print_function
 from configparser import ConfigParser
+from ansible_bundle import worker
 import sys
 import yaml
 
@@ -90,10 +91,11 @@ class Config:
     scm_prefix = DEFAULT_SCM_URL
     scm_roles = ''
     scm_modules = ''
-    verbose = QUIET
+    verbosity = QUIET
     dry = False
     colorize = True
     workers = 1
+    pool = None
 
     def __init__(self):
         pass
@@ -118,11 +120,15 @@ class Config:
                     return load_cfg(filename)
         return None
 
+
     def setvalues(self, cfg):
         for key, value in cfg.items('bundle'):
             setattr(self, key, value)
 
-        self.workers = int(self.workers)
+        for string in ('workers', 'verbosity'):
+            setattr(self, string, int(getattr(self, string)))
+
         if self.scm_prefix:
             self.scm_roles = self.scm_prefix + self.scm_roles
             self.scm_modules = self.scm_prefix + self.scm_modules
+        self.pool = worker.ThreadPool(int(self.workers))

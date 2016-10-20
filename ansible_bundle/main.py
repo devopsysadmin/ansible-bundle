@@ -12,9 +12,6 @@ DEFAULT_DRY=defaults.DRY
 DEFAULT_CLEAN=defaults.CLEAN
 DEFAULT_RUN=defaults.RUN
 
-downloaded = list()
-
-
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', help='YML file to be processed')
@@ -69,36 +66,26 @@ def run_playbook(filename, ansible_params, verbosity=0):
         rc = 1
     shell.exit(rc)
 
-def download(pool, bundle):
-    if bundle.properties not in downloaded:
-        downloaded.append(bundle.properties)
-        action = 'Updating' if bundle.exists else 'Getting'
-        shell.echo_info('%s %s (%s)...' %(action, bundle.name, bundle.version), lr=True)
-        pool.add_task(bundle.download)
-    for dep in bundle.dependencies():
-        download(pool, dep)
-
-def items(bundle, yml):
-    return [ item for sublist in [ item.get(bundle) for item in yml if item.get(bundle) ] for item in sublist ]
-
 def main():
     args, ansible = get_arguments()
+    if args.workers > 0: shell.config.workers = args.workers
     shell.config.initialize()
     shell.config.verbose = args.verbose
     shell.config.dry = args.dry
     shell.config.colorize = args.use_colors
-    if args.workers > 0: shell.config.workers = args.workers
 
     if args.clean is True:
         clean_dirs(['roles'])
 
     yml = load_site(args.filename)
-    tasks = items('roles', yml) + items('libraries', yml)
-    
-    pool = worker.ThreadPool(shell.config.workers)
-    for task in tasks:
-        download(pool, Bundle.from_dict(task))
-    pool.wait_completion()
+    downloaded = ['dummy']
+
+    for task in [ item for sublist in [ item.get('roles') for item in yml if item.get('roles') ] for item in sublist ]:
+        role = Bundle.from_dict(task)
+        shell.config.pool.add_task(role.download, downloaded)
+
+    ## Wait for all roles to be downloaded
+    shell.config.pool.wait_completion()
 
     # After getting bundles, run playbook if set to
     if args.dry is True:

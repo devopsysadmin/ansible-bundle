@@ -90,7 +90,11 @@ class Bundle(object):
     def __update_properties(self):
         self.properties = (self.name, self.version)
 
-    def download(self):
-        git = Git(self.url, self.path, self.version)
+    def download(self, check_array=None):
+        git = Git(self.url, self.path, self.version, self.name)
         func = git.update if self.exists else git.get
-        return func()
+        if check_array and self.properties not in check_array:
+            check_array.append(self.properties)
+            if func():
+                for dependency in self.dependencies():
+                    dependency.download(check_array)
