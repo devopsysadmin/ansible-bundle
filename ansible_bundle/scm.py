@@ -42,7 +42,6 @@ class Git:
                 rc, stdout = shell.run(cmd)
                 if rc == shell.ERROR:
                     return False
-        elif shell.config.verbose > defaults.QUIET:
-            shell.echo_info('Current branch mismatches bundle version. Assuming tag and skip.\n')
+        shell.echo_info('Current branch mismatches bundle version. Assuming tag and skip.')
         shell.cd(shell.WORKDIR)
         return True
