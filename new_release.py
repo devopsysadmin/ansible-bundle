@@ -60,6 +60,7 @@ def main():
 	script = (
 		[ 'git', 'commit', '-am', 'New version %s' %version ],
 		[ 'git', 'push'],
+		[ 'git', 'tag', version ],
 		[ 'git', 'push', '--tags' ],
 		[ 'python', 'setup.py', 'sdist', 'upload', '-r', 'pypi' ]
 		)

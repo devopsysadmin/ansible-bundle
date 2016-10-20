@@ -4,7 +4,7 @@
 import argparse
 import shlex
 from ansible_bundle import shell, defaults, worker
-from ansible_bundle.bundle import Bundle, PATH
+from ansible_bundle.bundle import Bundle
 import time
 
 DEFAULT_VERBOSITY=defaults.QUIET

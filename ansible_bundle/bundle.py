@@ -6,13 +6,6 @@ from ansible_bundle import defaults, shell
 from ansible_bundle.scm import Git
 
 WORKDIR = shell.WORKDIR
-CONFIG = shell.config
-
-PATH = {
-    'role': 'roles/',
-    'library': 'modules/',
-}
-
 
 class Role(object):
     name = None
@@ -29,12 +22,12 @@ class Role(object):
         self.name = split[0]
         if len(split) > 1:
             self.version = split[1]
-            self.path = shell.path(WORKDIR, PATH['role'], self.name, self.version)
+            self.path = shell.path(WORKDIR, 'roles', self.name, self.version)
         else:
-            self.version = CONFIG.SCM_VERSION
-            self.path = shell.path(WORKDIR, PATH['role'], 'unversioned', self.name)
+            self.version = shell.config.SCM_VERSION
+            self.path = shell.path(WORKDIR, 'roles', 'unversioned', self.name)
 
-        self.url = '%s/%s' % (CONFIG.scm_roles, self.name)
+        self.url = '%s/%s' % (shell.config.url, self.name)
 
 
 class Bundle(object):
@@ -65,8 +58,7 @@ class Bundle(object):
         return deps
 
     def __init__(self, typeof, raw):
-        if typeof == 'role':
-            bundle = Role(raw)
+        bundle = Role(raw)
         for key in ('name', 'path', 'version', 'url'):
             setattr(self, key, getattr(bundle, key))
         if shell.isdir(self.path):

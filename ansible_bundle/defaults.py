@@ -20,7 +20,7 @@ DOTS = '\n-------------------'
 
 HOME = getenv('HOME')
 WORKDIR = getcwd()
-DEFAULT_SCM_URL = 'https://github.com'
+DEFAULT_URL = 'https://github.com'
 
 # Color + decoration for messages printed on terminal
 
@@ -75,9 +75,7 @@ def text(s, **kwargs):
 class Config:
     SCM = 'git'
     SCM_VERSION = 'master'
-    scm_prefix = DEFAULT_SCM_URL
-    scm_roles = ''
-    scm_modules = ''
+    url = DEFAULT_URL
     verbosity = QUIET
     dry = False
     colorize = True
@@ -88,15 +86,22 @@ class Config:
         pass
 
     def initialize(self, **kwargs):
+
+        ### First, load the ansible.cfg values
         cfg = self.load()
         if cfg and cfg.has_section('bundle'):
-            self.setvalues(cfg)
+            for key, value in cfg.items('bundle'):
+                setattr(self, key, value)
+        
+        for string in ('workers', 'verbosity'):
+            ## The following values should be integer, not string
+            setattr(self, string, int(getattr(self, string)))
 
+        ### Then, the args bypassed by command line
         for name, value in kwargs.items():
             if value: setattr(self, name, value)
 
-        for string in ('workers', 'verbosity'):
-            setattr(self, string, int(getattr(self, string)))
+        self.pool = worker.ThreadPool(self.workers)
 
 
     def load(self):
@@ -112,13 +117,3 @@ class Config:
                 if isfile(filename):
                     return load_cfg(filename)
         return None
-
-
-    def setvalues(self, cfg):
-        for key, value in cfg.items('bundle'):
-            setattr(self, key, value)
-
-        if self.scm_prefix:
-            self.scm_roles = self.scm_prefix + self.scm_roles
-            self.scm_modules = self.scm_prefix + self.scm_modules
-        self.pool = worker.ThreadPool(int(self.workers))

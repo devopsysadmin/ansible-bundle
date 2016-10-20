@@ -48,23 +48,25 @@ also won't search for dependencies)
 
 # Configuration
 
-ansible-bundle expects to find a `[bundle]` section into ansible.cfg 
-file with this configuration:
+ansible-bundle expects to find a `[bundle]` section into ansible.cfg, which may 
+contain some of the command lines parameters:
 
-- `SCM_PREFIX` (mandatory): URL where the roles (or libraries) are located. For 
-example, if role `apache` is in `github.com/foo/roles/apache`, the `SCM_PREFIX` 
-should be set to `github.com/foo/roles`.
+- workers
 
-- `SCM_ROLES` | `SCM_MODULES` (optional): if roles are on a directory different 
-than modules, these parameters will set both, preffixing `SCM_PREFIX` . 
-Following the previous example, `SCM_PREFIX` should be github.com/foo, 
-`SCM_ROLES` will be `roles` and `SCM_MODULES` will be `/modules`
+- verbosity
+
+And the following extra options:
+
+- `url`: URL where the roles are located. For example, if role `apache` is in 
+`github.com/foo/roles/apache`, the `url` should be set to `github.com/foo/roles`.
+Default is 'https://github.com'
 
 ## bundle.cfg example
+		[bundle]
+		url='git@github.com:devopsysadmin/ansible-roles'
+		workers=5
+		verbosity=1
 
-		SCM_PREFIX='git@github.com:devopsysadmin'
-		SCM_ROLES='/ansible-roles'
-		SCM_MODULES='/ansible-modules'
 
 # Unversioned bundles
 
