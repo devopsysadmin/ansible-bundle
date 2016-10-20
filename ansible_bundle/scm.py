@@ -42,6 +42,5 @@ class Git:
                 rc, stdout = shell.run(cmd)
                 if rc == shell.ERROR:
                     return False
-        shell.echo_info('Current branch mismatches bundle version. Assuming tag and skip.')
         shell.cd(shell.WORKDIR)
         return True
