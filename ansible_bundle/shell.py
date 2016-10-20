@@ -42,8 +42,9 @@ def echo(message, lr=True, typeOf=None, stderr=False, color=None):
     sys.stdout.flush()
 
 def echo_debug(message):
-    echo('[DEBUG] ', lr=False, typeOf='debug')
-    echo(message, lr=True)
+    if config.verbosity >= defaults.DEBUG:
+        echo('[DEBUG] ', lr=False, typeOf='debug')
+        echo(message, lr=True)
 
 def echo_error(message):
     echo('[ERROR] %s' %message, typeOf='error', stderr=True)

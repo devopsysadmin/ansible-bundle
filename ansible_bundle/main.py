@@ -21,23 +21,18 @@ def get_arguments():
                         help='Will give info about the changes to be performed')
     parser.add_argument('--bundle-deps-only', dest='dont_play', action='store_true', default=False,
                         help='Don\'t run the playbook after getting dependencies')
-    parser.add_argument('-v', '--verbose', action='count', default=DEFAULT_VERBOSITY)
+    parser.add_argument('-v', '--verbose', action='count')
     parser.add_argument('--version', action='version', version='%s %s' %(shell.prog, shell.version) )
     parser.add_argument('--bundle-disable-color', dest='use_colors', action='store_false', default=True,
                         help='Don\'t colorize console output')
-    parser.add_argument('--bundle-workers', dest='workers', type=int, default=0,
+    parser.add_argument('--bundle-workers', dest='workers', type=int,
                         help='Concurrent downloads when getting roles. Default: %s' %defaults.Config.workers)
     return parser.parse_known_args()
 
 
-def clean_dirs(directories):
-    for directory in directories:
-        shell.echo('Cleaning %s directory...' %directory,
-                   typeOf='info', lr=False)
-        if shell.rmdir('roles') is True:
-            shell.echo('OK', typeOf='ok')
-        else:
-            shell.echo('ERROR', typeOf='error')
+def clean_roles():
+    shell.echo_info('Cleaning roles directory...')
+    shell.rmdir('roles')
 
 
 def load_site(filename):
@@ -68,24 +63,25 @@ def run_playbook(filename, ansible_params, verbosity=0):
 
 def main():
     args, ansible = get_arguments()
-    if args.workers > 0: shell.config.workers = args.workers
-    shell.config.initialize()
-    shell.config.verbose = args.verbose
+    shell.config.initialize(
+        verbosity=args.verbose,
+        workers=args.workers
+        )
     shell.config.dry = args.dry
     shell.config.colorize = args.use_colors
+    pool = shell.config.pool
 
     if args.clean is True:
-        clean_dirs(['roles'])
+        clean_roles()
 
     yml = load_site(args.filename)
     downloaded = ['dummy']
 
+    ## Download roles and dependencies in threaded workers. Then wait for them to be finished
     for task in [ item for sublist in [ item.get('roles') for item in yml if item.get('roles') ] for item in sublist ]:
         role = Bundle.from_dict(task)
-        shell.config.pool.add_task(role.download, downloaded)
-
-    ## Wait for all roles to be downloaded
-    shell.config.pool.wait_completion()
+        pool.add_task(role.download, downloaded)
+    pool.wait_completion()
 
     # After getting bundles, run playbook if set to
     if args.dry is True:

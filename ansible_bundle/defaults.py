@@ -58,19 +58,6 @@ def load_cfg(filename):
         sys.exit('Cannot load %s' %filename)
 
 
-def echo(message, lr=True, typeOf=None):
-    if lr:
-        end = '\n'
-    else:
-        end = ' '
-    if typeOf:
-        color, decoration = defaults.MESSAGES[typeOf]
-        msg = Color.text(message, color=color, decoration=decoration)
-    else:
-        msg = message
-    print(msg, end=end)
-    sys.stdout.flush()
-
 def text(s, **kwargs):
     msg = ''
     color = kwargs.get('color', None)
@@ -100,10 +87,16 @@ class Config:
     def __init__(self):
         pass
 
-    def initialize(self):
+    def initialize(self, **kwargs):
         cfg = self.load()
         if cfg and cfg.has_section('bundle'):
             self.setvalues(cfg)
+
+        for name, value in kwargs.items():
+            if value: setattr(self, name, value)
+
+        for string in ('workers', 'verbosity'):
+            setattr(self, string, int(getattr(self, string)))
 
 
     def load(self):
@@ -124,9 +117,6 @@ class Config:
     def setvalues(self, cfg):
         for key, value in cfg.items('bundle'):
             setattr(self, key, value)
-
-        for string in ('workers', 'verbosity'):
-            setattr(self, string, int(getattr(self, string)))
 
         if self.scm_prefix:
             self.scm_roles = self.scm_prefix + self.scm_roles
