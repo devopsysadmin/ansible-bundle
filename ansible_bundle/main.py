@@ -27,6 +27,8 @@ def get_arguments():
                         help='Don\'t colorize console output')
     parser.add_argument('--bundle-workers', dest='workers', type=int,
                         help='Concurrent downloads when getting roles. Default: %s' %defaults.Config.workers)
+    parser.add_argument('--bundle-safe-update', dest='safe', action='store_true', default=False,
+                        help='If any role has manually change, don\'t perform a previous cleanup')
     return parser.parse_known_args()
 
 
@@ -65,7 +67,8 @@ def main():
     args, ansible = get_arguments()
     shell.config.initialize(
         verbosity=args.verbose,
-        workers=args.workers
+        workers=args.workers,
+        safe=args.safe
         )
     shell.config.dry = args.dry
     shell.config.colorize = args.use_colors

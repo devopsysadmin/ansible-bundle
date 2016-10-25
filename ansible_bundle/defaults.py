@@ -71,6 +71,16 @@ def text(s, **kwargs):
         msg += END
     return (msg)
 
+def _to_bool(string):
+    default = False
+    if isinstance(string, bool):
+        return string
+    elif isinstance(string, str):
+        if string.lower() in ('true'):
+            return True
+        else:
+            return False
+    return default
 
 class Config:
     SCM = 'git'
@@ -81,6 +91,7 @@ class Config:
     colorize = True
     workers = 1
     pool = None
+    safe = False
 
     def __init__(self):
         pass
@@ -96,6 +107,10 @@ class Config:
         for string in ('workers', 'verbosity'):
             ## The following values should be integer, not string
             setattr(self, string, int(getattr(self, string)))
+
+        for string in ('safe',):
+            ## The following values should be boolean, not string
+            setattr(self, string, _to_bool(getattr(self, string)))
 
         ### Then, the args bypassed by command line
         for name, value in kwargs.items():

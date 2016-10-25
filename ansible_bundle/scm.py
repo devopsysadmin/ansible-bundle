@@ -7,6 +7,7 @@ class Git:
     path = None
     branch = None
     name = None
+    safe = shell.config.safe
 
     def __init__(self, url, path='.', branch='master', name=None):
         self.url = url
@@ -15,7 +16,7 @@ class Git:
         self.name = name
 
     def _is_branch(self):
-        with open(shell.path('.git', 'HEAD')) as fn:
+        with open(shell.path(self.path, '.git', 'HEAD')) as fn:
             ref = fn.read()
         return self.branch in ref
 
@@ -24,7 +25,6 @@ class Git:
         cmd = ['git', 'clone', '--branch', self.branch,
                '--depth', '1', self.url, self.path]
         rc, stdout = shell.run(cmd)
-        shell.cd(shell.WORKDIR)
         if rc == shell.OK:
             return True
         else:
@@ -32,18 +32,14 @@ class Git:
 
     def update(self):
         shell.echo_info('Updating %s (%s) ...' %(self.name, self.branch))
-        shell.cd(self.path)
+        clean = ['git', '-C', self.path, 'reset', '--hard']
+        update = ['git', '-C', self.path, 'pull', '--rebase', 'origin', self.branch] 
         if self._is_branch():
-            cmds = (
-                ['git', 'checkout', '.'],
-                ['git', 'pull', '--rebase', 'origin', self.branch],
-                )
+            cmds = (clean, update) if not self.safe else update
             for cmd in cmds:
                 rc, stdout = shell.run(cmd)
                 if rc == shell.ERROR:
                     return False
         else:
             shell.echo_debug('Current branch mismatches bundle version. Assuming tag and skip.')
-
-        shell.cd(shell.WORKDIR)
         return True
