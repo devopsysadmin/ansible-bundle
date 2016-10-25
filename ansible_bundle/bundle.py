@@ -83,7 +83,7 @@ class Bundle(object):
         self.properties = (self.name, self.version)
 
     def download(self, check_array=None):
-        git = Git(self.url, self.path, self.version, self.name)
+        git = Git(self.url, self.path, self.version, self.name, shell.config.safe)
         func = git.update if self.exists else git.get
         if check_array and self.properties not in check_array:
             check_array.append(self.properties)

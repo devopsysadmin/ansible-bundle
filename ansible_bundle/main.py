@@ -28,7 +28,7 @@ def get_arguments():
     parser.add_argument('--bundle-workers', dest='workers', type=int,
                         help='Concurrent downloads when getting roles. Default: %s' %defaults.Config.workers)
     parser.add_argument('--bundle-safe-update', dest='safe', action='store_true', default=False,
-                        help='If any role has manually change, don\'t perform a previous cleanup')
+                        help='If role directory exists, don\'t perform any change')
     return parser.parse_known_args()
 
 
@@ -65,6 +65,10 @@ def run_playbook(filename, ansible_params, verbosity=0):
 
 def main():
     args, ansible = get_arguments()
+
+    ## If debug mode is enabled, reduce workers to 1 for better printing
+    if args.verbose > 2: args.workers=1
+
     shell.config.initialize(
         verbosity=args.verbose,
         workers=args.workers,

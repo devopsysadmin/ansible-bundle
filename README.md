@@ -13,8 +13,8 @@ repositories before launching a playbook.
 # Prerequisites
 
 - Ansible. Any version.
-- Git > 1.6 (possibly will work on earlier releases, but hasn't been tested)
-- Python 2 > 2.6
+- Git >= 1.8.5
+- Python 2 >= 2.6
 
 # Installation
 
@@ -34,7 +34,7 @@ repositories before launching a playbook.
 
 ansible-bundle, along the ansible-playbook parameters, has also these:
 
-- `--bundle-clean-roles` Will clean roles and library directories before download
+- `--bundle-clean-roles` Will clean roles and library directories before download (*)
 
 - `--bundle-dry` Shows what will be run (as it won't download anything, 
 also won't search for dependencies)
@@ -45,6 +45,10 @@ also won't search for dependencies)
 
 - `--bundle-workers` concurrent connections when downloading/updating roles. Default: 1
 
+- `--bundle-safe-update` Don't clean existing roles. (*)
+
+(*) If both `bundle-clean-roles` and `bundle-safe-update` are set, `bundle-clean-roles` will take effect.
+
 
 # Configuration
 
@@ -54,6 +58,8 @@ contain some of the command lines parameters:
 - workers
 
 - verbosity
+
+- safe
 
 And the following extra options:
 
