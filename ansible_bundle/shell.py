@@ -50,6 +50,8 @@ def echo_error(message):
     echo('[ERROR] %s' %message, typeOf='error', stderr=True)
 
 def echo_info(message):
+    if config.verbosity >= defaults.DEBUG:
+        echo('\n')
     if config.verbosity > defaults.QUIET:
         echo('[INFO] %s\n' %message, typeOf='info', lr=False)
 
@@ -62,7 +64,7 @@ def call(command):
 
 def run(command, output=False):
     if config.verbosity >= defaults.DEBUG:
-        echo_debug('IN:\n' + ' '.join(command)+'\n')
+        echo_debug(' '.join(command))
     if config.dry is False:
         try:
             process = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
