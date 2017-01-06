@@ -2,10 +2,11 @@
 # -*- encoding: utf8 -*-
 #
 
-from ansible_bundle import defaults, shell
+from ansible_bundle import shell
 from ansible_bundle.scm import Git
 
 WORKDIR = shell.WORKDIR
+
 
 class Role(object):
     name = None
@@ -52,7 +53,8 @@ class Bundle(object):
         meta = shell.path(self.path, 'meta', 'main.yml')
         if shell.isfile(meta):
             contents = shell.load(meta)
-            if contents is None: contents = dict()
+            if contents is None:
+                contents = dict()
             for dep in contents.get('dependencies', list()):
                 deps.append(Bundle.from_dict(dep))
         return deps
@@ -83,7 +85,13 @@ class Bundle(object):
         self.properties = (self.name, self.version)
 
     def download(self, check_array=None):
-        git = Git(self.url, self.path, self.version, self.name, shell.config.safe)
+        git = Git(
+            self.url,
+            self.path,
+            self.version,
+            self.name,
+            shell.config.safe
+        )
         func = git.update if self.exists else git.get
         if check_array and self.properties not in check_array:
             check_array.append(self.properties)

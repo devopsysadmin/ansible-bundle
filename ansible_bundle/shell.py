@@ -17,6 +17,7 @@ prog = os.path.basename(sys.argv[0])
 version = __version__
 config = defaults.Config()
 
+
 def load(filename):
     if os.path.isfile(filename):
         with open(filename, 'r') as fn:
@@ -41,33 +42,44 @@ def echo(message, lr=True, typeOf=None, stderr=False, color=None):
         print(msg, end=end)
     sys.stdout.flush()
 
+
 def echo_debug(message):
     if config.verbosity >= defaults.DEBUG:
         echo('[DEBUG] ', lr=False, typeOf='debug')
         echo(message, lr=True)
 
+
 def echo_error(message):
-    echo('[ERROR] %s' %message, typeOf='error', stderr=True)
+
+    echo('[ERROR] %s' % message, typeOf='error', stderr=True)
+
 
 def echo_info(message):
     if config.verbosity >= defaults.DEBUG:
         echo('\n')
     if config.verbosity > defaults.QUIET:
-        echo('[INFO] %s\n' %message, typeOf='info', lr=False)
+        echo('[INFO] %s\n' % message, typeOf='info', lr=False)
+
 
 def echo_warning(message):
-    echo('[WARN] %s' %message, typeOf='warning')
+    echo('[WARN] %s' % message, typeOf='warning')
 
 
 def call(command):
     return subprocess.call(command)
+
 
 def run(command, output=False):
     if config.verbosity >= defaults.DEBUG:
         echo_debug(' '.join(command))
     if config.dry is False:
         try:
-            process = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(
+                                        command,
+                                        shell=False,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE
+                                      )
             stdout, stderr = process.communicate()
             output = stdout + stderr
             returncode = process.returncode
@@ -80,8 +92,9 @@ def run(command, output=False):
     else:
         output, returncode = ('OK', 0)
     if config.verbosity >= defaults.DEBUG:
-        echo_debug ('OUT:\n' + output.decode('utf-8') + defaults.DOTS)
+        echo_debug('OUT:\n' + output.decode('utf-8') + defaults.DOTS)
     return returncode, output
+
 
 def pwd():
     return os.getcwd()
@@ -110,13 +123,14 @@ def walk(args):
 def cd(dirname):
     try:
         os.chdir(dirname)
-        retval=True
+        retval = True
     except:
-        retval=False
+        retval = False
 
     if retval and config.verbosity >= defaults.DEBUG:
         echo_debug('Current dir is ' + dirname + defaults.DOTS)
     return retval
+
 
 def rmdir(dirname):
     if os.path.exists(dirname):
