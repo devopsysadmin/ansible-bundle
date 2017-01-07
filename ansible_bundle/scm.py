@@ -1,6 +1,6 @@
 # -*- encoding: utf8 -*-
 
-from ansible_bundle import shell, defaults
+from ansible_bundle import shell
 
 '''
 REFS status
@@ -9,7 +9,7 @@ REFS status
 2 : ref exists and is a tag
 '''
 
-REF_NONE, REF_BRANCH, REF_TAG=(0,1,2)
+REF_NONE, REF_BRANCH, REF_TAG = (0, 1, 2)
 
 
 class Git:
@@ -36,7 +36,7 @@ class Git:
             return REF_TAG
 
     def get(self):
-        shell.echo_info('Getting %s (%s) ...' %(self.name, self.version))
+        shell.echo_info('Getting %s (%s) ...' % (self.name, self.version))
         cmd = ['git', 'clone', '--branch', self.version,
                '--depth', '1', self.url, self.path]
         rc, stdout = shell.run(cmd)
@@ -46,19 +46,23 @@ class Git:
             return False
 
     def update(self):
-        shell.echo_info('Updating %s (%s) ...' %(self.name, self.version))
+        shell.echo_info('Updating %s (%s) ...' % (self.name, self.version))
         clean = ['git', '-C', self.path, 'reset', '--hard']
-        update = ['git', '-C', self.path, 'pull', '--rebase', 'origin', self.version]
+        update = ['git', '-C', self.path, 'pull',
+                  '--rebase', 'origin', self.version]
         ref = self._get_ref()
         if ref == REF_TAG:
-                shell.echo_debug('Current version is actually a tag, so no changes apply')
+                shell.echo_debug('Current version is actually a tag,',
+                                 ' so no changes apply')
         elif ref == REF_BRANCH and self.safe:
-            shell.echo_debug('As bundle-safe-update was set, directory will not change')
+            shell.echo_debug('As bundle-safe-update was set,',
+                             ' directory will not change')
         elif ref == REF_BRANCH and not self.safe:
             for cmd in (clean, update):
                 rc, stdout = shell.run(cmd)
                 if rc == shell.ERROR:
                     return False
         else:
-            shell.echo_debug('Current version mismatches bundle version. Assuming tag and skip.')
+            shell.echo_debug('Current version mismatches bundle version.',
+                             'Assuming tag and skip.')
         return True

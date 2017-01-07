@@ -2,7 +2,6 @@ from __future__ import print_function
 from configparser import ConfigParser
 from ansible_bundle import worker
 import sys
-import yaml
 
 from os.path import join, isfile
 from os import getcwd, getenv
@@ -30,7 +29,7 @@ COLORS = {
     'green': '\033[92m',
     'yellow': '\033[93m',
     'blue': '\033[94m',
-    'magenta' : '\033[95m',
+    'magenta': '\033[95m',
 }
 
 DECORATIONS = {
@@ -49,13 +48,14 @@ MESSAGES = {
 
 END = '\033[0m'
 
+
 def load_cfg(filename):
     try:
         config = ConfigParser()
         config.read(filename)
         return config
     except:
-        sys.exit('Cannot load %s' %filename)
+        sys.exit('Cannot load %s' % filename)
 
 
 def text(s, **kwargs):
@@ -71,6 +71,7 @@ def text(s, **kwargs):
         msg += END
     return (msg)
 
+
 def _to_bool(string):
     default = False
     if isinstance(string, bool):
@@ -81,6 +82,7 @@ def _to_bool(string):
         else:
             return False
     return default
+
 
 class Config:
     SCM = 'git'
@@ -98,26 +100,26 @@ class Config:
 
     def initialize(self, **kwargs):
 
-        ### First, load the ansible.cfg values
+        # First, load the ansible.cfg values
         cfg = self.load()
         if cfg and cfg.has_section('bundle'):
             for key, value in cfg.items('bundle'):
                 setattr(self, key, value)
-        
+
         for string in ('workers', 'verbosity'):
-            ## The following values should be integer, not string
+            # The following values should be integer, not string
             setattr(self, string, int(getattr(self, string)))
 
         for string in ('safe',):
-            ## The following values should be boolean, not string
+            # The following values should be boolean, not string
             setattr(self, string, _to_bool(getattr(self, string)))
 
-        ### Then, the args bypassed by command line
+        # Then, the args bypassed by command line
         for name, value in kwargs.items():
-            if value: setattr(self, name, value)
+            if value:
+                setattr(self, name, value)
 
         self.pool = worker.ThreadPool(self.workers)
-
 
     def load(self):
         LOAD_ORDER = (
@@ -126,7 +128,7 @@ class Config:
             join('etc', 'ansible', 'ansible.cfg')
         )
         if getenv('ANSIBLE_CONFIG') is not None:
-            return load_cfg(os.getenv('ANSIBLE_CONFIG'))
+            return load_cfg(getenv('ANSIBLE_CONFIG'))
         else:
             for filename in LOAD_ORDER:
                 if isfile(filename):

@@ -2,9 +2,9 @@
 
 from setuptools import setup, find_packages
 from ansible_bundle import __version__
-import sys
 
-setup(name='ansible-bundle',
+setup(
+      name='ansible-bundle',
       version=__version__,
       description="Manage ansible role and modules versioned dependencies.",
       long_description=open('README.md').read(),
@@ -31,4 +31,4 @@ setup(name='ansible-bundle',
           'Programming Language :: Python :: 2',
           'Topic :: Utilities'
       ]
-)
+     )
