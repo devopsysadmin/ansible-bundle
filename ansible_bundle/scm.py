@@ -52,10 +52,10 @@ class Git:
                   '--rebase', 'origin', self.version]
         ref = self._get_ref()
         if ref == REF_TAG:
-                shell.echo_debug('Current version is actually a tag,',
+                shell.echo_debug('Current version is actually a tag,'
                                  ' so no changes apply')
         elif ref == REF_BRANCH and self.safe:
-            shell.echo_debug('As bundle-safe-update was set,',
+            shell.echo_debug('As bundle-safe-update was set,'
                              ' directory will not change')
         elif ref == REF_BRANCH and not self.safe:
             for cmd in (clean, update):
