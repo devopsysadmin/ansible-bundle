@@ -16,20 +16,19 @@ class Role(object):
 
     def __init__(self, raw):
         if isinstance(raw, dict):
-            split = raw.get('role', 'unnamed').split('/')
+            split = raw.get('role', 'unnamed').split('@')
         else:
-            split = raw.split('/')
+            split = raw.split('@')
 
         self.name = split[0]
-        if len(split) > 1:
-            self.version = split[1]
-            self.path = shell.path(WORKDIR, 'roles', self.name, self.version)
-        else:
-            self.version = shell.config.SCM_VERSION
-            self.path = shell.path(WORKDIR, 'roles', 'unversioned', self.name)
-
         self.url = '%s/%s' % (shell.config.url, self.name)
 
+        if len(split)>1:
+            self.version = split[1]
+            self.path = shell.path(WORKDIR, 'roles', '%s@%s' %(self.name, self.version))
+        else:
+            self.version = 'master'
+            self.path = shell.path(WORKDIR, 'roles', self.name)
 
 class Bundle(object):
 
