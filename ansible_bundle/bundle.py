@@ -20,12 +20,27 @@ class Role(object):
         else:
             split = raw.split('@')
 
+        if isinstance(raw, dict):
+            _split = raw.get('role', 'unnamed').split('/')
+        else:
+            _split = raw.split('/')
+
+        if len(_split)>len(split):
+            split = _split
+            shell.echo_warning('Deprecation warning: plese use {name}@{version} instead of {name}/{version}'.format(
+                name=split[0],
+                version=split[1])
+            )
+            separator = '/'
+        else:
+            separator = '@'
+
         self.name = split[0]
         self.url = '%s/%s' % (shell.config.url, self.name)
 
         if len(split)>1:
             self.version = split[1]
-            self.path = shell.path(WORKDIR, 'roles', '%s@%s' %(self.name, self.version))
+            self.path = shell.path(WORKDIR, 'roles', '%s%s%s' %(self.name, separator, self.version))
         else:
             self.version = 'master'
             self.path = shell.path(WORKDIR, 'roles', self.name)
