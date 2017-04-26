@@ -66,3 +66,7 @@ target/
 
 #Bash utilities
 *.sh
+
+#IDEs
+.idea
+
