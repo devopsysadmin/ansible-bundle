@@ -7,8 +7,9 @@ Small tool for automatic download roles and libs a-la-Gemfile
 As many roles have changed their configurations among time, anyone would use a
 specific version of a role (for instance, a commit, or a branch, or a tag).
 Moreover, a complex playbook could need different versions from the same role. 
-This app will download roles and modules (bundles, from now on) from their 
-repositories before launching a playbook.
+This app will download roles (bundles, from now on) from their 
+repositories before launching a playbook. _That means that a role should be in
+its own repository_.
 
 # Prerequisites
 
@@ -39,7 +40,7 @@ ansible-bundle, along the ansible-playbook parameters, has also these:
 - `--bundle-dry` Shows what will be run (as it won't download anything, 
 also won't search for dependencies)
 
-- `--bundle-deps-only` Don't run the playbook, just satisfies dependencies.
+- `--bundle-deps-only` Don't run the playbook, just satisfy dependencies.
 
 - `--bundle-disable-color` Useful for non-interactive consoles
 
@@ -74,29 +75,6 @@ Default is 'https://github.com'
 		verbosity=1
 
 
-# Unversioned bundles
-
-This program will download from a GIT repository a branch (or tag). If no 
-branch is set, will try to download master. But, in order to have an 
-unversioned bundle living peacefully with a versioned bundle, those unversioned 
-will be downloaded within their own directory. So, if you have (or need) 
-unversioned bundles, add or modify this line to `ansible.cfg`, into `defaults` 
-section:
-
-- Before:
-
-        [defaults]
-        ...
-        roles_path    = ./roles
-        ...
-
-- After:
-  
-        [defaults]
-        ...
-        roles_path    = ./roles/unversioned:./roles
-        ...
-
 # Example of use
 
 Given the following playbook (site.yml):
@@ -107,11 +85,23 @@ Given the following playbook (site.yml):
 
 		- hosts: all
 		  roles:
-		    - postgresql/1.0
+		    - postgresql@1.0
 		    - { role: apache, version: '2.4' }
 
 Running `ansible-bundle site.yml` will search roles into the `site-common.yml` file and 
-download them. Also, will download role postgresql 1.0 and apache master.
+add to download queue, which already includes postgresql 1.0 and apache master.
+
+Please note that each role is intended to be in its own repository, not in a folder.
+
+# Changelog
+
+## v 0.6
+
+- Syntax role/version changes to role@version. This simplifies the configuration in
+ansible.cfg and allows branches names such as feature/something in role version.
+If a versioned role with the previous syntax is found, will complain with a
+deprecation warning. The previous syntax will be obsoleted in v 0.7.
+
 
 # Author
 
