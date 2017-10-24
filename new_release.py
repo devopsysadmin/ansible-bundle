@@ -69,7 +69,7 @@ def main():
         ['git', 'push'],
         ['git', 'tag', version],
         ['git', 'push', '--tags'],
-        ['python', 'setup.py', 'sdist', 'upload', '-r', 'pypi']
+        ['python', 'setup.py', 'sdist', 'upload']
     )
     for line in script:
         call(line)
