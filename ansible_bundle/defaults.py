@@ -18,7 +18,7 @@ ERROR = 1
 DOTS = '\n-------------------'
 
 HOME = getenv('HOME')
-WORKDIR = getcwd()
+WORKDIR = getenv('WORKDIR')
 DEFAULT_URL = 'https://github.com'
 
 # Color + decoration for messages printed on terminal

@@ -1,6 +1,11 @@
 # -*- encoding: utf8 -*-
 #
 
+import sys
+from os import environ, path
+if len(sys.argv)>0:
+    environ['WORKDIR'] = path.dirname(sys.argv[1])
+
 import argparse
 from ansible_bundle import shell, defaults
 from ansible_bundle.bundle import Role
@@ -85,6 +90,7 @@ def run_playbook(filename, ansible_params, verbosity=0):
 
 def main():
     args, ansible = get_arguments()
+    shell.cd(defaults.WORKDIR)
 
     # If debug mode is enabled, reduce workers to 1 for better printing
     if args.verbose > 2:

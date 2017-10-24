@@ -141,3 +141,9 @@ def rmdir(dirname):
             return False
     else:
         return True
+
+def dirname(filename):
+    return os.path.dirname(filename)
+
+def basename(filename):
+    return os.path.basename(filename)
