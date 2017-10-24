@@ -48,6 +48,8 @@ also won't search for dependencies)
 
 - `--bundle-safe-update` Don't clean existing roles. (*)
 
+- `--bundle-git-user`, `--bundle-git-pass` Username in case git url needs authentication.
+
 (*) If both `bundle-clean-roles` and `bundle-safe-update` are set, `bundle-clean-roles` will take effect.
 
 
@@ -71,6 +73,8 @@ Default is 'https://github.com'
 ## bundle.cfg example
 		[bundle]
 		url='git@github.com:devopsysadmin/ansible-roles'
+		git_user=foo
+		git_pass=bar
 		workers=5
 		verbosity=1
 
