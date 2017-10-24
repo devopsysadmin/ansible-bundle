@@ -104,7 +104,7 @@ Please note that each role is intended to be in its own repository, not in a fol
 - Syntax role/version changes to role@version. This simplifies the configuration in
 ansible.cfg and allows branches names such as feature/something in role version.
 If a versioned role with the previous syntax is found, will complain with a
-deprecation warning. The previous syntax will be obsoleted in v 0.7.
+deprecation warning. The previous syntax will be obsoleted in the future.
 
 
 # Author
