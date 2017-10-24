@@ -1,9 +1,14 @@
 # -*- encoding: utf8 -*-
 #
 
+import sys
+from os import environ, path
+if len(sys.argv)>0:
+    environ['WORKDIR'] = path.dirname(sys.argv[1])
+
 import argparse
 from ansible_bundle import shell, defaults
-from ansible_bundle.bundle import Bundle
+from ansible_bundle.bundle import Role
 
 DEFAULT_VERBOSITY = defaults.QUIET
 DEFAULT_DRY = defaults.DRY
@@ -38,6 +43,13 @@ def get_arguments():
                         action='store_true', default=False,
                         help=('If role directory exists, don\'t'
                               'perform any change'))
+    parser.add_argument('--bundle-git-username', dest='git_user', default=None,
+                        help=('If a https git url is set, use this'
+                        ' parameter as default user'))
+    parser.add_argument('--bundle-git-password', dest='git_pass', default=None,
+                        help=('If a https git url is set, use this'
+                        ' parameter as default password'))
+
     return parser.parse_known_args()
 
 
@@ -78,15 +90,18 @@ def run_playbook(filename, ansible_params, verbosity=0):
 
 def main():
     args, ansible = get_arguments()
+    shell.cd(defaults.WORKDIR)
 
     # If debug mode is enabled, reduce workers to 1 for better printing
     if args.verbose > 2:
         args.workers = 1
 
     shell.config.initialize(
-        verbosity=args.verbose,
-        workers=args.workers,
-        safe=args.safe
+        verbosity = args.verbose,
+        workers = args.workers,
+        safe = args.safe,
+        git_user = args.git_user,
+        git_password = args.git_pass
         )
     shell.config.dry = args.dry
     shell.config.colorize = args.use_colors
@@ -104,7 +119,7 @@ def main():
                                       item.get('roles') for item in yml
                                       if item.get('roles')
                                      ] for item in sublist]:
-        role = Bundle.from_dict(task)
+        role = Role(task)
         pool.add_task(role.download, downloaded)
     pool.wait_completion()
 

@@ -1,6 +1,7 @@
 # -*- encoding: utf8 -*-
 
 from ansible_bundle import shell
+from urlparse import urlparse
 
 '''
 REFS status
@@ -19,12 +20,22 @@ class Git:
     name = None
     safe = False
 
-    def __init__(self, url, path='.', version='master', name=None, safe=False):
-        self.url = url
+    def __init__(self, url, path='.', version='master', name=None, safe=False, 
+                    username=None, password=None):
         self.path = path
         self.version = version
         self.name = name
         self.safe = safe
+        url_parsed = urlparse(url)
+        if username and not url_parsed.username:
+            self.url = '{scheme}://{credentials}@{url}{context}'.format(
+                        scheme = url_parsed.scheme,
+                        credentials = '%s:%s' %(username, password) if password else username,
+                        url = url_parsed.netloc,
+                        context = url_parsed.path
+                        )
+        else:
+            self.url = url
 
     def _get_ref(self):
         head = shell.path(self.path, '.git', 'HEAD')

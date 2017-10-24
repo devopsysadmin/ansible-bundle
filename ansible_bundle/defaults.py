@@ -18,7 +18,7 @@ ERROR = 1
 DOTS = '\n-------------------'
 
 HOME = getenv('HOME')
-WORKDIR = getcwd()
+WORKDIR = getenv('WORKDIR')
 DEFAULT_URL = 'https://github.com'
 
 # Color + decoration for messages printed on terminal
@@ -94,6 +94,8 @@ class Config:
     workers = 1
     pool = None
     safe = False
+    git_user = None
+    git_pass = None
 
     def __init__(self):
         pass

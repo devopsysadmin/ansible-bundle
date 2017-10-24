@@ -7,34 +7,53 @@ from ansible_bundle.scm import Git
 
 WORKDIR = shell.WORKDIR
 
+def splitted(element):
+    if isinstance(element, dict):
+        split = element.get('role', 'unnamed').split('@')
+    else:
+        split = element.split('@')
+
+    if isinstance(element, dict):
+        _split = element.get('role', 'unnamed').split('/')
+    else:
+        _split = element.split('/')
+
+    if len(_split)>len(split):
+        split = _split
+        shell.echo_warning('Deprecation warning: plese use {name}@{version} instead of {name}/{version}'.format(
+            name=split[0],
+            version=split[1])
+        )
+        separator = '/'
+    else:
+        separator = '@'
+    return split, separator
+
 
 class Role(object):
+
     name = None
     path = None
     version = None
     url = None
+    exists = False
+    properties = (name, version)
+    git_user = None
+    git_pass = None
+
+    def dependencies(self):
+        deps = list()
+        meta = shell.path(self.path, 'meta', 'main.yml')
+        if shell.isfile(meta):
+            contents = shell.load(meta)
+            if contents is None:
+                contents = dict()
+            for role in contents.get('dependencies', list()):
+                deps.append(Role(role))
+        return deps
 
     def __init__(self, raw):
-        if isinstance(raw, dict):
-            split = raw.get('role', 'unnamed').split('@')
-        else:
-            split = raw.split('@')
-
-        if isinstance(raw, dict):
-            _split = raw.get('role', 'unnamed').split('/')
-        else:
-            _split = raw.split('/')
-
-        if len(_split)>len(split):
-            split = _split
-            shell.echo_warning('Deprecation warning: plese use {name}@{version} instead of {name}/{version}'.format(
-                name=split[0],
-                version=split[1])
-            )
-            separator = '/'
-        else:
-            separator = '@'
-
+        split, separator = splitted(raw)
         self.name = split[0]
         self.url = '%s/%s' % (shell.config.url, self.name)
 
@@ -45,41 +64,13 @@ class Role(object):
             self.version = 'master'
             self.path = shell.path(WORKDIR, 'roles', self.name)
 
-class Bundle(object):
+        if isinstance(raw, dict):
+            self.git_user = raw.get('git_user', shell.config.git_user)
+            self.git_pass = raw.get('git_pass', shell.config.git_pass)
 
-    name = None
-    path = None
-    version = None
-    url = None
-    exists = False
-    properties = (name, version)
-
-    @classmethod
-    def from_dict(bundle, json):
-        if isinstance(json, dict):
-            if json.get('role', None):
-                return bundle('role', json)
-        else:
-            return bundle('role', json)
-
-    def dependencies(self):
-        deps = list()
-        meta = shell.path(self.path, 'meta', 'main.yml')
-        if shell.isfile(meta):
-            contents = shell.load(meta)
-            if contents is None:
-                contents = dict()
-            for dep in contents.get('dependencies', list()):
-                deps.append(Bundle.from_dict(dep))
-        return deps
-
-    def __init__(self, typeof, raw):
-        bundle = Role(raw)
-        for key in ('name', 'path', 'version', 'url'):
-            setattr(self, key, getattr(bundle, key))
         if shell.isdir(self.path):
             self.exists = True
-        self.__update_properties()
+        self.properties = self.name, self.version
 
     def __str__(self):
         string = """
@@ -95,16 +86,15 @@ class Bundle(object):
         )
         return string
 
-    def __update_properties(self):
-        self.properties = (self.name, self.version)
-
     def download(self, check_array=None):
         git = Git(
-            self.url,
-            self.path,
-            self.version,
-            self.name,
-            shell.config.safe
+            url = self.url,
+            path = self.path,
+            version = self.version,
+            name = self.name,
+            safe = shell.config.safe,
+            username = self.git_user,
+            password = self.git_pass
         )
         func = git.update if self.exists else git.get
         if check_array and self.properties not in check_array:
