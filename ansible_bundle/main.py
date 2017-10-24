@@ -43,10 +43,10 @@ def get_arguments():
                         action='store_true', default=False,
                         help=('If role directory exists, don\'t'
                               'perform any change'))
-    parser.add_argument('--bundle-git-username', dest='git_user', default=None,
+    parser.add_argument('--bundle-git-user', dest='git_user', default=None,
                         help=('If a https git url is set, use this'
                         ' parameter as default user'))
-    parser.add_argument('--bundle-git-password', dest='git_pass', default=None,
+    parser.add_argument('--bundle-git-pass', dest='git_pass', default=None,
                         help=('If a https git url is set, use this'
                         ' parameter as default password'))
 
