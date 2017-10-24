@@ -10,7 +10,7 @@ setup(
       long_description=open('README.md').read(),
       keywords='ansible roles modules',
       author='David PG',
-      author_email='david.3pwood@gmail.com',
+      author_email='davidpg@protonmail.com',
       url='https://github.com/devopsysadmin/ansible-bundle',
       license='GPL v2',
       packages=find_packages(exclude=['test']),

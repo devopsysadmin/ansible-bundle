@@ -94,6 +94,8 @@ class Config:
     workers = 1
     pool = None
     safe = False
+    git_user = None
+    git_pass = None
 
     def __init__(self):
         pass
