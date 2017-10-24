@@ -51,6 +51,7 @@ class Git:
         cmd = ['git', 'clone', '--branch', self.version,
                '--depth', '1', self.url, self.path]
         rc, stdout = shell.run(cmd)
+        shell.echo_debug(stdout)
         if rc == shell.OK:
             return True
         else:

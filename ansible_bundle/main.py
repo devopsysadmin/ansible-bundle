@@ -101,7 +101,7 @@ def main():
         workers = args.workers,
         safe = args.safe,
         git_user = args.git_user,
-        git_password = args.git_pass
+        git_pass = args.git_pass
         )
     shell.config.dry = args.dry
     shell.config.colorize = args.use_colors
