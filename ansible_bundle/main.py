@@ -9,6 +9,8 @@ if len(sys.argv)>0:
 import argparse
 from ansible_bundle import shell, defaults
 from ansible_bundle.bundle import Role
+import jinja2
+from ast import literal_eval as str_to_dict
 
 DEFAULT_VERBOSITY = defaults.QUIET
 DEFAULT_DRY = defaults.DRY
@@ -49,6 +51,9 @@ def get_arguments():
     parser.add_argument('--bundle-git-pass', dest='git_pass', default=None,
                         help=('If a https git url is set, use this'
                         ' parameter as default password'))
+    parser.add_argument('--bundle-vars-file', dest='varsfile', default=None,
+                        help=('Parse this varsfile file before getting any '
+                        'role'))
 
     return parser.parse_known_args()
 
@@ -58,7 +63,35 @@ def clean_roles():
     shell.rmdir('roles')
 
 
-def load_site(filename):
+class SilentUndefined(jinja2.Undefined):
+    def _fail_with_undefined_error(self, *args, **kwargs):
+        return ''
+
+    __add__ = __radd__ = __mul__ = __rmul__ = __div__ = __rdiv__ = \
+        __truediv__ = __rtruediv__ = __floordiv__ = __rfloordiv__ = \
+        __mod__ = __rmod__ = __pos__ = __neg__ = __call__ = \
+        __getitem__ = __lt__ = __le__ = __gt__ = __ge__ = __int__ = \
+        __float__ = __complex__ = __pow__ = __rpow__ = \
+        _fail_with_undefined_error
+
+def from_varsfile(filename, varsfile):
+    if varsfile is None:
+        return shell.load(filename)
+
+    contents = ''
+    if not shell.isfile(varsfile):
+        shell.echo_error('File %s not found' %varsfile)
+        shell.exit(defaults.ERROR)
+
+    env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(defaults.WORKDIR),
+            undefined=SilentUndefined
+            )
+    contents = env.get_template(filename).render(shell.load(varsfile))
+    return shell.load(str(contents))
+
+
+def load_site(filename, varsfile):
     if filename is None:
         return list()
     if not shell.isfile(filename):
@@ -67,7 +100,7 @@ def load_site(filename):
     bundlelist = list()
 
     # The Playbook is always an array
-    for item in shell.load(filename):
+    for item in from_varsfile(filename, varsfile):
         include = item.get('include', None)
         if include:
             bundlelist += load_site(include)
@@ -110,7 +143,7 @@ def main():
     if args.clean is True:
         clean_roles()
 
-    yml = load_site(args.filename)
+    yml = load_site(args.filename, args.varsfile)
     downloaded = ['dummy']
 
     # Download roles and dependencies in threaded workers.

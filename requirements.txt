@@ -1,2 +1,3 @@
 configparser
 pyyaml
+Jinja2

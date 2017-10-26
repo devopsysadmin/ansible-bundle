@@ -17,12 +17,12 @@ prog = os.path.basename(sys.argv[0])
 version = __version__
 config = defaults.Config()
 
-
-def load(filename):
-    if os.path.isfile(filename):
-        with open(filename, 'r') as fn:
+def load(stream):
+    if os.path.isfile(stream):
+        with open(stream, 'r') as fn:
             return yaml.load(fn)
-
+    elif isinstance(stream, str):
+        return yaml.load(stream)
 
 def echo(message, lr=True, typeOf=None, stderr=False, color=None):
     if lr:
